@@ -2,23 +2,23 @@
 <title>WebGL技术精品：水母</title>
 <meta name="Description" content="如果你能想象出在光线充足的海里拍摄一群水母游动样子，那这里用WebGL技术实现的水母游动的效果绝对会让你以为是一段真实拍摄的视频。不能不佩服作者的技术高超。">
 <!-- base href="http://www.webhek.com/misc-res/webgl-jellyfish/" -->
-<link href="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/style.css" rel="stylesheet" type="text/css">
-<script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/analytics.js" async=""></script><script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/jquery-1.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/mjs.js"></script>
+<link href="style.css" rel="stylesheet" type="text/css">
+<script src="analytics.js" async=""></script><script type="text/javascript" src="jquery-1.js"></script>
+<script type="text/javascript" src="mjs.js"></script>
 
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/initWin.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/initUniforms.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/initTextures.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/initShaders.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/initBuffers.js"></script>
+<script type="text/javascript" src="initWin.js"></script>
+<script type="text/javascript" src="initUniforms.js"></script>
+<script type="text/javascript" src="initTextures.js"></script>
+<script type="text/javascript" src="initShaders.js"></script>
+<script type="text/javascript" src="initBuffers.js"></script>
 
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/interact.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/debug.js"></script>
+<script type="text/javascript" src="interact.js"></script>
+<script type="text/javascript" src="debug.js"></script>
 
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/tick.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/simulator.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/drawJellyfish.js"></script>
-<script type="text/javascript" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/drawScene.js"></script>
+<script type="text/javascript" src="tick.js"></script>
+<script type="text/javascript" src="simulator.js"></script>
+<script type="text/javascript" src="drawJellyfish.js"></script>
+<script type="text/javascript" src="drawScene.js"></script>
 
 
 <script id="jellyfish-vs" type="x-shader/x-vertex">
@@ -130,7 +130,7 @@ $(document).ready(function(){
 });
 </script>
 
-<script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/shorten.json" charset="utf-8"></script><script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/counts.json" charset="utf-8"></script></head>
+<script src="shorten.json" charset="utf-8"></script><script src="counts.json" charset="utf-8"></script></head>
 <body screen_capture_injected="true">
   <div id="statusBar">
 
@@ -193,10 +193,10 @@ $(document).ready(function(){
     <div class="Qg">
       <div class="Dg"><span class="tf"><span class="iI"></span><span class="MM jI">41</span></span></div>
       <div class="RF a-share">
-        <div class="IH"><a href="javascript:;" onclick="w('tsina')"><img class="ho JH HM" title="分享到新浪微博" alt="分享到新浪微博" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/tsina.png"></a></div>
-        <div class="IH"><a href="javascript:;" onclick="w('tqq')"><img class="ho JH HM" title="分享到QQ空间" alt="分享到QQ空间" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/qzone.png"></a></div>
-        <div class="IH"><a href="javascript:;" onclick="w('facebook')"><img class="ho JH HM" title="分享到Facebook" alt="分享到Facebook" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/facebook.png"></a></div>
-        <div class="IH"><a href="javascript:;" onclick="w('twitter')"><img class="ho JH HM" title="分享到Twitter" alt="分享到Twitter" src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/twitter.png"></a></div>
+        <div class="IH"><a href="javascript:;" onclick="w('tsina')"><img class="ho JH HM" title="分享到新浪微博" alt="分享到新浪微博" src="tsina.png"></a></div>
+        <div class="IH"><a href="javascript:;" onclick="w('tqq')"><img class="ho JH HM" title="分享到QQ空间" alt="分享到QQ空间" src="qzone.png"></a></div>
+        <div class="IH"><a href="javascript:;" onclick="w('facebook')"><img class="ho JH HM" title="分享到Facebook" alt="分享到Facebook" src="facebook.png"></a></div>
+        <div class="IH"><a href="javascript:;" onclick="w('twitter')"><img class="ho JH HM" title="分享到Twitter" alt="分享到Twitter" src="twitter.png"></a></div>
       </div>
     </div></div>
     </div>
@@ -222,8 +222,8 @@ $(document).ready(function(){
         </div>
     </div>
     <canvas id="webgl-canvas" width="1475" height="319" style="width: 1475px; height: 319px;"></canvas>
-<script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/util.js"></script>
-<a style="display:none" href="http://www.webhek.com/">webhek</a> <script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/ga.js"></script><script>var shares_wb = 17;</script><script src="WebGL%E6%8A%80%E6%9C%AF%E7%B2%BE%E5%93%81%EF%BC%9A%E6%B0%B4%E6%AF%8D_files/wb.js"></script>
+<script src="util.js"></script>
+<a style="display:none" href="http://www.webhek.com/">webhek</a> <script src="ga.js"></script><script>var shares_wb = 17;</script><script src="wb.js"></script>
 
 </body></html>
 <!-- Performance optimized by W3 Total Cache. Learn more: http://www.w3-edge.com/wordpress-plugins/
