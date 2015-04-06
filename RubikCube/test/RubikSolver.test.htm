@@ -13,6 +13,16 @@
         var OutputText = rs.GetResult(InputText);
         console.trace(OutputText);
         document.write( "<br/><font color=\"red\">" + OutputText + "</font><br/>");
+
+        str = "A";
+        code = str.charCodeAt ();
+        str2 = String.fromCharCode (code +1);
+        str3 = String.fromCharCode (0x60 +26);
+
+        document.write (code + '<br />');
+        document.write (str2 + '<br />');
+        document.write (str3);
+
     </script>
 
 </body>
