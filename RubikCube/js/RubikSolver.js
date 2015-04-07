@@ -33,9 +33,9 @@ var CHAROFFSET = 65;
 var isDebug = true;
 function debug(s) {
     if (isDebug) {
-        document.write(s)
+       // console.write(s)
     } else {
-        console.write(s)
+       // console.write(s)
     }
 }
 
@@ -307,8 +307,8 @@ function searchphase(movesleft, movesdone, lastmove) {
 
     debug("phase=" + phase + "  " + "getposition(phase)=" + getposition(phase) + "|");
 
-    if ((tables[phase][getposition(phase)]).charCodeAt(0) - 1 > movesleft ||
-        (tables[phase + 1][getposition(phase + 1)]).charCodeAt(0) - 1 > movesleft) return false;
+    if ((tables[phase][getposition(phase)]) - 1 > movesleft ||
+        (tables[phase + 1][getposition(phase + 1)]) - 1 > movesleft) return false;
 
     if (movesleft == 0) return true;
 
