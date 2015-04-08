@@ -1,0 +1,33 @@
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Timyy Rubik Solver test</title>
+    <link rel="stylesheet" href="././node_modules/mocha/mocha.css" />
+</head>
+<body>
+<div id="mocha"></div>
+<script src="././node_modules/mocha/mocha.js"></script>
+<script src="././node_modules/chai/chai.js"></script>
+<script>
+    mocha.ui('bdd');
+    mocha.reporter('html');
+    var expect = chai.expect;
+</script>
+
+
+<!-- include source files here... -->
+<!-- lib -->
+<!-- script src='../js/lib/lodash.js'></script>
+
+<!-- this project src -->
+<script src="./RubikCube/js/RubikSolver.js"></script>
+
+<script src="spec/spec_helpers.js"></script>
+<!-- include spec files here... -->
+<script src="spec/RubikCube/RubikSolver.js"></script>
+
+<script>
+    (window.mochaPhantomJS || window.mocha).run();
+</script>
+</body>
+</html>
