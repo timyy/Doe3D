@@ -30,10 +30,10 @@ var phase = 0;
 var tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
 var CHAROFFSET = 65;
 
-var isDebug = true;
+var isDebug = false;
 function debug(s) {
     if (isDebug) {
-       // console.write(s)
+           document.write(s)
     } else {
        // console.write(s)
     }
