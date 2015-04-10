@@ -119,8 +119,20 @@ describe('RubikSolver', function () {
         });
     });
     describe('#numtoperm', function () {
-        it('returns zero for same strings', function () {
-
+        var pos = [20];
+        rs.clear = function () {
+            for (var i = 0; i < 20; i++) {
+                pos [i] = i;
+            }
+        };
+        beforeEach(function () {
+            return rs.clear();;
+        });
+        it('numtoperm ', function () {
+            var n = 10;
+            rs.numtoperm(pos, n % 24, 12);
+            expect(pos[0]).to.eql(0);
+            expect(pos[1]).to.eql(1);
         });
     });
     describe('#getposition', function () {

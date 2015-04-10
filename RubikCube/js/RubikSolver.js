@@ -199,14 +199,14 @@ function RubikSolver() {
      */
     this.numtoperm = function (p, n, o) {
         //p += o;
-        p[3 + o] = String.fromCharCode(o);
+        p[3 + o] = (o);
         for (var a = 3; a-- > 0;) {
-            p[a + o] = String.fromCharCode(n % (4 - a) + o);
+            p[a + o] = (n % (4 - a) + o);
             n /= 4 - a;
             for (var b = a; ++b < 4;) {
                 if (p[b + o] >= p[a + o]) {
                     // p[b + o]++;
-                    p[b + o] = String.fromCharCode((p[b + o]).charCodeAt(0) + 1); //todo 这里又是个古怪的地方，Conver,ToChar 对应的String.fromCharCode
+                    p[b + o] = (p[b + o]) + 1; //todo 这里又是个古怪的地方，Conver,ToChar 对应的String.fromCharCode
                 }
             }
         }
