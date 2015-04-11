@@ -32,8 +32,8 @@ function RubikSolver() {
     var order = "AECGBFDHIJKLMSNTROQP".split("");
     var bithash = "TdXhQaRbEFIJUZfijeYV".split("");
     var perm = "AIBJTMROCLDKSNQPEKFIMSPRGJHLNTOQAGCEMTNSBFDHORPQ".split("");
-    this.pos = new Array(20);
-    this.ori = new Array(20);
+    this.pos = new Uint32Array(20);
+    this.ori = new Uint32Array(20);
     var val = new Uint32Array(20);     // 原来是char
     var tables = new Array(8);  //TODO: 二维数组，得看一下需要怎么处理。
     var move = new Uint32Array(20);
