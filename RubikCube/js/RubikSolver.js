@@ -42,7 +42,7 @@ function RubikSolver() {
     var tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
     var CHAROFFSET = 65;
 
-    var isDebug = false;
+    var isDebug = true;
 
     /**
      *
@@ -53,23 +53,26 @@ function RubikSolver() {
     RubikSolver.prototype.GetResult = function (sInput) {
         phase = 0;
         var argv = sInput.split(' ');
-        var sOutput = ""
+        var sOutput = "";
 
         if (argv.length != 20) {
             return "error";
         }
 
-        var f, i = 0, j = 0, k = 0, pc, mor;
+        var f, i = 0, pc, mor;
 
         this.debug("<br/>开始 val: -------------<br/>")
 
-        for (; k < 20; k++) {
+        for (var k=0 ; k < 20; k++) {
             val[k] = (k < 12 ? 2 : 3);
             this.debug(k.toString() + "-" + val[k] + "|");  //TODO: debug
         }
 
-        this.debug("<br/>开始 filltable: -------------<br/>")
-        for (; j < 8; j++) {
+        this.debug("<br/>开始 filltable:<br/>");
+        //for (var j=0; j < 8; j++) {
+        //    this.filltable(j);
+        //}
+        for (var j=1; j < 3; j++) {
             this.filltable(j);
         }
         this.debug("<br/>开始处理 -------------<br/>");
@@ -89,24 +92,23 @@ function RubikSolver() {
             for (f = 0; f < 20; f++) {
                 // this.debug("pc=" + pc +"/" + (bithash[f].charCodeAt(0) - 64))
                 if (pc == bithash[f].charCodeAt(0) - 64) {
-                    this.debug(" || hit pc=" + pc)
+                    this.debug(" || hit pc=" + pc);
                     break;
                 }
             }
             this.debug(" --- ");
             this.pos[order[i].charCodeAt(0) - CHAROFFSET] = (f);
-            this.debug(" pos[" + order[i] + ":" + (order[i].charCodeAt(0) - CHAROFFSET) + "] = ");
-            this.debug(f + "|")
+            // this.debug(" pos[" + order[i] + ":" + (order[i].charCodeAt(0) - CHAROFFSET) + "] = ");
+            // this.debug(f + "|")
             this.ori[order[i].charCodeAt(0) - CHAROFFSET] = (mor % val[i]);
-            this.debug("ori[" + (order[i].charCodeAt(0) - CHAROFFSET).toString() + "]=" + (mor % val[i]) + "<br/>")
+            // this.debug("ori[" + (order[i].charCodeAt(0) - CHAROFFSET).toString() + "]=" + (mor % val[i]) + "<br/>")
         }
 
         this.debug("<br/>开始解<br/>");
         for (; phase < 8; phase += 2) {
-
             for (j = 0; !this.searchphase(j, 0, 9); j++) ;
             for (i = 0; i < j; i++) {
-                sOutput += "FBRLUD"[move[i]] + "" + moveamount[i].ToString();
+                sOutput += "FBRLUD"[move[i]] + "" + moveamount[i];
                 sOutput += " ";
                 this.debug(sOutput);
             }
@@ -166,12 +168,12 @@ function RubikSolver() {
     }
 
     this.reset = function () {
-        this.debug("rest<br/>");
+        // this.debug("rest<br/>");
         for (var i = 0; i < 20; i++) {
             this.pos [i] = i; // String.fromCharCode(i);
-            this.debug("pos[" + i + "]=" + this.pos [i].toString());
+            // this.debug("pos[" + i + "]=" + this.pos [i].toString());
             this.ori[i] = 0; // String.fromCharCode(0);
-            this.debug("ori[" + i + "]=" + this.ori[i].toString());
+            // this.debug("ori[" + i + "]=" + this.ori[i].toString());
         }
     }
 
@@ -221,10 +223,12 @@ function RubikSolver() {
         var i = -1, n = 0;
         switch (t) {
             case 1:
-                for (; ++i < 12;) n += (this.ori[i]) << i;  //todo
+                for (; ++i < 12;)
+                    n = n+ (this.ori[i]) << i;  //todo
                 break;
             case 2:
-                for (i = 20; --i > 11;) n = n * 3 + this.ori[i];
+                for (i = 20; --i > 11;)
+                    n = n * 3 + this.ori[i];
                 break;
             case 3:
                 for (; ++i < 12;) n += (((this.pos [i]) & 8) > 0) ? (1 << i) : 0;
@@ -257,6 +261,7 @@ function RubikSolver() {
                 break;
 
         }
+//        this.debug("<br/>Getposition:" +t +":"+ n+ "<br/>")
         return n;
     }
 
@@ -268,22 +273,26 @@ function RubikSolver() {
     this.setposition = function (t, n) {
         var i = 0, j = 12, k = 0;
         var corn = "QRSTQRTSQSRTQTRSQSTRQTSR".split("");
-        debug("<br/>Begin setposition -- " + t.toString() + " -- " + n + " == ");
-        reset();
+        // this.debug("<br/>Begin setposition -- " + t.toString() + " -- " + n + " == ");
+        this.reset();
 
         switch (t) {
             // case 0 does nothing so leaves cube solved
 
             case 1://edgeflip
-                for (; i < 12; i++, n >>= 1) {
-                    this.ori[i] = n & 1 ; // String.fromCharCode(n & 1);
-                    this.debug("ori[" + i + "]:" + this.ori[i] + "|");
+                for (; i < 12; i++) {
+                    this.ori[i] = n & 1 ;
+                    n = n >>1;
+                     // String.fromCharCode(n & 1);
+                    // this.debug("ori[" + i + "]:" + this.ori[i] + "|");
                 }
                 break;
             case 2://cornertwist
-                for (i = 12; i < 20; i++, n /= 3) {
-                    this.ori[i] = n % 3 ; // String.fromCharCode(n % 3);
-                    this.debug(i + ":" + this.ori[i] + "|");
+                for (i = 12; i < 20; i++) {
+                    this.ori[i] = n % 3 ;
+                    n = n/3;
+                    // String.fromCharCode(n % 3);
+                    // this.debug(i + ":" + this.ori[i] + "|");
                 }
                 break;
             case 3://middle edge choice
@@ -299,15 +308,15 @@ function RubikSolver() {
                     this.pos [i + 12] = (((n & 1) > 0) ? corn[offset + k++].charCodeAt(0) - CHAROFFSET : j++);
                 break;
             case 6://slice permutations
-                numtoperm(this.pos, n % 24, 12);
+                this.numtoperm(this.pos, n % 24, 12);
                 n /= 24;
-                numtoperm(this.pos, n % 24, 4);
+                this.numtoperm(this.pos, n % 24, 4);
                 n /= 24;
-                numtoperm(this.pos, n, 0);
+                this.numtoperm(this.pos, n, 0);
                 break;
             case 7://corner permutations
-                numtoperm(this.pos, n / 24, 8);
-                numtoperm(this.pos, n % 24, 16);
+                this.numtoperm(this.pos, n / 24, 8);
+                this.numtoperm(this.pos, n % 24, 16);
                 break;
         }
     }
@@ -339,21 +348,18 @@ function RubikSolver() {
      * @param ti
      */
     this.filltable = function (ti) {
-        this.debug("<br/>Begin fill table: " + ti + " -- ");
         var n = 1;
         var l = 1;
         var tl = tablesize[ti];
 
-        this.debug(tl);
-        var tb = new Array(tl);
+        var tb = new Uint32Array(tl);
         tables[ti] = tb;
 
-        for (var i = 0; i < tb.Length; i++) tb[i] = String.fromCharCode(0); // ('\0');
-
+        this.debug("<br/>Begin fill table: " + ti + ":" + tablesize[ti]+ " "+ tb.length +"<br/>");
+        for (var i = 0; i < tb.length; i++) tb[i] = 0; // ('\0');
         this.reset();
-        tb[this.getposition(ti)] = String.fromCharCode(1);
-
-        this.debug("!" + tb[this.getposition(ti)] + "|" + this.getposition(ti) + "!");
+        tb[this.getposition(ti)] = 1;
+        this.debug("Getpos:" + tb[this.getposition(ti)] + "|" + this.getposition(ti) + "!");
 
         // while there are positions of depth l
         while (n > 0) {
@@ -370,11 +376,12 @@ function RubikSolver() {
                             this.domove(f);
                             // get resulting position
                             var r = this.getposition(ti);
+                            this.debug("R=" +r) ;
                             // if move as allowed in that phase, and position is a new one
-                            if ((q == 2 || f >= (ti & 6)) && tb[r] == '\0') {
+                            if ((q == 2 || f >= (ti & 6)) && tb[r] == 0) {   // '\0') {
                                 // mark that position as depth l+1
-                                tb[r] = String.fromCharCode(l + 1);
-                                this.debug(tb[r] + " ");
+                                tb[r] = (l + 1);
+                                this.debug("r=" + r + " l=" + l);
                                 n++;
                             }
                         }
@@ -384,7 +391,11 @@ function RubikSolver() {
             }
             l++;
         }
-        this.debug("End fill table<br/> ");
+        this.debug("<br/> " +tb.length +"<br/>");
+        for(var i =0; i< tb.length && i <100 ; i++) {
+           this.debug(tb[i]);
+        }
+        this.debug("<br/>End fill table<br/>");
 
     }
 
@@ -396,9 +407,8 @@ function RubikSolver() {
      * @returns {boolean}
      */
     this.searchphase = function (movesleft, movesdone, lastmove) {
-        this.debug("<br/>searchphase: " + movesleft + "|" + movesdone + "|" + lastmove + "<br/>")
-
-        this.debug("phase=" + phase + "  " + "getposition(phase)=" + this.getposition(phase) + "|");
+        // this.debug("<br/>searchphase: " + movesleft + "|" + movesdone + "|" + lastmove + "<br/>");
+        // this.debug("phase=" + phase + "  " + "getposition(phase)=" + this.getposition(phase) + "|");
 
         if ((tables[phase][this.getposition(phase)]) - 1 > movesleft ||
             (tables[phase + 1][this.getposition(phase + 1)]) - 1 > movesleft) return false;
@@ -409,7 +419,7 @@ function RubikSolver() {
             if ((i - lastmove != 0) && ((i - lastmove + 1) != 0 || ((i | 1) != 0))) {
                 move[movesdone] = i;
                 for (var j = 0; ++j < 4;) {
-                    domove(i);
+                    this.domove(i);
                     moveamount[movesdone] = j;
                     if ((j == 2 || i >= phase) &&
                         this.searchphase(movesleft - 1, movesdone + 1, i)) return true;
