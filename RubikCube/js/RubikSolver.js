@@ -42,7 +42,7 @@ function RubikSolver() {
     var tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
     var CHAROFFSET = 65;
 
-    var isDebug = true;
+    var isDebug = false;
 
     /**
      *
@@ -72,7 +72,7 @@ function RubikSolver() {
         //for (var j=0; j < 8; j++) {
         //    this.filltable(j);
         //}
-        for (var j=1; j < 3; j++) {
+        for (var j = 0; j < 8; j++) {
             this.filltable(j);
         }
         this.debug("<br/>开始处理 -------------<br/>");
@@ -140,10 +140,11 @@ function RubikSolver() {
     /**
      *
      * @param p
-     * @param a
+     * @param a a is char
      * @param offset
      */
     this.cycle = function (p, a, offset) {
+
         var temp = p[this.Char2Num(a[0 + offset])];
         p[this.Char2Num(a[0 + offset])] = p[this.Char2Num(a[1 + offset])];
         p[this.Char2Num(a[1 + offset])] = temp;
@@ -157,12 +158,14 @@ function RubikSolver() {
 
     /**
      *
-     * @param i
+     * @param i is char
      * @param a
      */
     this.twist = function (i, a) {
+        this.debug("<br/>twist i=" + i + " a=" + a);
         // i -= CHAROFFSET;
-        var index = i - CHAROFFSET;
+//        var index = i.charCodeAt(0) - CHAROFFSET;    //todo 花了两个星期才找到的bug, 原来的程序有病
+        var index = this.Char2Num(i);
         this.ori[index] = (this.ori[index]  + a + 1) % val[index];
             //String.fromCharCode(((this.ori[index]).charCodeAt(0) + a + 1) % val[index].charCodeAt(0));
     }
@@ -221,10 +224,13 @@ function RubikSolver() {
      */
     this.getposition = function (t) {
         var i = -1, n = 0;
+        this.debug("<br/>Getpos t=" + t);
         switch (t) {
             case 1:
-                for (; ++i < 12;)
-                    n = n+ (this.ori[i]) << i;  //todo
+                for (; ++i < 12;) {
+                    n += ((this.ori[i]) << i);  //todo
+                    this.debug(" ori[" + i + "]=" + this.ori[i] + " n=" + n + " ");
+                }
                 break;
             case 2:
                 for (i = 20; --i > 11;)
@@ -273,9 +279,8 @@ function RubikSolver() {
     this.setposition = function (t, n) {
         var i = 0, j = 12, k = 0;
         var corn = "QRSTQRTSQSRTQTRSQSTRQTSR".split("");
-        // this.debug("<br/>Begin setposition -- " + t.toString() + " -- " + n + " == ");
+        this.debug("<br/>Setpos --t=" + t.toString() + " n=" + n + " == ");
         this.reset();
-
         switch (t) {
             // case 0 does nothing so leaves cube solved
 
@@ -284,7 +289,7 @@ function RubikSolver() {
                     this.ori[i] = n & 1 ;
                     n = n >>1;
                      // String.fromCharCode(n & 1);
-                    // this.debug("ori[" + i + "]:" + this.ori[i] + "|");
+                    this.debug("ori[" + i + "]:" + this.ori[i] + "|");
                 }
                 break;
             case 2://cornertwist
@@ -292,7 +297,7 @@ function RubikSolver() {
                     this.ori[i] = n % 3 ;
                     n = n/3;
                     // String.fromCharCode(n % 3);
-                    // this.debug(i + ":" + this.ori[i] + "|");
+                    this.debug("ori[" + i + "]:" + this.ori[i] + "|");
                 }
                 break;
             case 3://middle edge choice
@@ -319,6 +324,7 @@ function RubikSolver() {
                 this.numtoperm(this.pos, n % 24, 16);
                 break;
         }
+        this.debug("End Setpos<br/>")
     }
 
     /**
@@ -326,6 +332,16 @@ function RubikSolver() {
      * @param m
      */
     this.domove = function (m) {
+        this.debug("<br/>Domove m=" + m);
+        this.debug("<br/>init pos= ");
+        for (var j = 0; j < this.pos.length; j++) {
+            this.debug(this.pos[j] + " ");
+        }
+        this.debug("<br/>init ori= ");
+        for (var j = 0; j < this.ori.length; j++) {
+            this.debug(this.ori[j] + " ");
+        }
+
         //char* p = perm + 8 * m;
         var offset = 8 * m;
         var i = 8;
@@ -338,9 +354,22 @@ function RubikSolver() {
         //twist corners if RLFB
         if (m < 4)
             for (; --i > 3;) this.twist(perm[i + offset], i & 1);
+        this.debug("<br/> ori= ");
+        for (var j = 0; j < this.ori.length; j++) {
+            this.debug(this.ori[j] + " ");
+        }
         //flip edges if FB
         if (m < 2)
             for (i = 4; i-- > 0;) this.twist(perm[i + offset], 0);
+
+        this.debug("<br/> pos= ");
+        for (var j = 0; j < this.pos.length; j++) {
+            this.debug(this.pos[j] + " ");
+        }
+        this.debug("<br/> ori= ");
+        for (var j = 0; j < this.ori.length; j++) {
+            this.debug(this.ori[j] + " ");
+        }
     }
 
     /**
@@ -359,15 +388,15 @@ function RubikSolver() {
         for (var i = 0; i < tb.length; i++) tb[i] = 0; // ('\0');
         this.reset();
         tb[this.getposition(ti)] = 1;
-        this.debug("Getpos:" + tb[this.getposition(ti)] + "|" + this.getposition(ti) + "!");
+        this.debug("Getpos:" + tb[this.getposition(ti)] + "|" + this.getposition(ti) + "<br/>");
 
         // while there are positions of depth l
         while (n > 0) {
             n = 0;
             // find each position of depth l
             for (var i = 0; i < tl; i++) {
-                // this.debug("i=" + i + "/" + tl + "<br/>")
                 if (tb[i] == l) {
+                    this.debug("i=" + i + "/" + l + "<br/>")
                     //construct that cube position
                     this.setposition(ti, i);
                     // try each face any amount
@@ -376,7 +405,7 @@ function RubikSolver() {
                             this.domove(f);
                             // get resulting position
                             var r = this.getposition(ti);
-                            this.debug("R=" +r) ;
+                            this.debug(" R= " + r);
                             // if move as allowed in that phase, and position is a new one
                             if ((q == 2 || f >= (ti & 6)) && tb[r] == 0) {   // '\0') {
                                 // mark that position as depth l+1
