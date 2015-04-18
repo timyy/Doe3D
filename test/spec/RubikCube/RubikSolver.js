@@ -14,8 +14,13 @@ describe('Car 测试变量 ', function () {
 });
 describe('RubikSolver', function () {
     var rs = new RubikSolver();
-    it('#GetResult', function () {
+    it('#GetResult 1', function () {
         var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU";
+        var OutputText = "D1 B3 F1 U3 B1 L2 U3 B2 D3 L2 U1 R1 D1 F2 D1 L2 D2 B2 D3 L2 D1 B2 U2 L2 D2 B2 U2 L2 B2 R2 ";
+        expect(rs.GetResult(InputText)).to.eql(OutputText);
+    });
+    it('#GetResult 2', function () {
+        var InputText = "N NNE NE NEE E SEE SE SSE S SSW SW SWW W NWW NW NNW N";
         var OutputText = "D1 B3 F1 U3 B1 L2 U3 B2 D3 L2 U1 R1 D1 F2 D1 L2 D2 B2 D3 L2 D1 B2 U2 L2 D2 B2 U2 L2 B2 R2 ";
         expect(rs.GetResult(InputText)).to.eql(OutputText);
     });
@@ -48,9 +53,10 @@ describe('RubikSolver', function () {
             }
         };
         beforeEach(function () {
-            return rs.clear();;
+            return rs.clear();
+            ;
         });
-        describe('#cycle 1', function() {
+        describe('#cycle 1', function () {
             it('pos 1 should 8', function () {
                 rs.cycle(pos, perm, 1);
                 expect(pos[1]).to.eql(8);
@@ -58,7 +64,7 @@ describe('RubikSolver', function () {
 
             });
         });
-        describe('#cycle 2', function() {
+        describe('#cycle 2', function () {
             it('pos 1 should 12', function () {
                 rs.cycle(pos, perm, 2);
                 expect(pos[1]).to.eql(12);
@@ -70,14 +76,24 @@ describe('RubikSolver', function () {
     });
 
     describe('#twist', function () {
-        var offset = 8 * 1;
-        var i = 8;
-        var perm = "AIBJTMROCLDKSNQPEKFIMSPRGJHLNTOQAGCEMTNSBFDHORPQ".split("");
-        it('twist 8', function () {
-            rs.twist(perm[i + offset], i & 1);
-            expect(rs.ori[0]).to.eql(1);
-            expect(rs.ori[1]).to.eql(0);
-            expect(rs.ori[2]).to.eql(0);
+
+        it('twist m=0', function () {
+            var m = 0;
+            var perm = "AIBJTMROCLDKSNQPEKFIMSPRGJHLNTOQAGCEMTNSBFDHORPQ".split("");
+            var offset = 8 * m;
+            var i = 8;
+
+            rs.reset();
+            //twist corners if RLFB
+            if (m < 4)
+                for (; --i > 3;) rs.twist(perm[i + offset], i & 1);
+            //0 0 0 0 0 0 0 0 0 0 0 0 2 0 2 0 0 1 0 1
+            expect(rs.ori).to.eql([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1]);
+            //flip edges if FB
+            if (m < 2)
+                for (i = 4; i-- > 0;) rs.twist(perm[i + offset], 0);
+            // ori= 1 1 0 0 0 0 0 0 1 1 0 0 2 0 2 0 0 1 0 1
+            expect(rs.ori).to.eql([1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1]);
         });
     });
     describe('#reset', function () {
@@ -126,7 +142,8 @@ describe('RubikSolver', function () {
             }
         };
         beforeEach(function () {
-            return rs.clear();;
+            return rs.clear();
+            ;
         });
         it('numtoperm ', function () {
             var n = 10;
@@ -146,13 +163,53 @@ describe('RubikSolver', function () {
         });
     });
     describe('#domove', function () {
-        it('returns zero for same strings', function () {
-
+        it('domove 0', function () {
+            rs.reset();
+            rs.domove(0);
+            expect(rs.pos).to.eql([9, 8, 2, 3, 4, 5, 6, 7, 0, 1, 10, 11, 19, 13, 17, 15, 16, 12, 18, 14]);
+            expect(rs.ori).to.eql([1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2, 0, 2, 0, 0, 1, 0, 1]);
+        });
+        it('domove 1', function () {
+            rs.reset();
+            rs.domove(1);
+            expect(rs.pos).to.eql([0, 1, 10, 11, 4, 5, 6, 7, 8, 9, 3, 2, 12, 18, 14, 16, 13, 17, 15, 19]);
+            expect(rs.ori).to.eql([0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 2, 0, 2, 1, 0, 1, 0]);
         });
     });
     describe('#filltable', function () {
-        it('returns zero for same strings', function () {
-
+        // [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
+        it('fill table 0', function () {
+            rs.reset();
+            var tb;
+            tb = rs.filltable(0);
+            expect(tb.length).to.eql(1);
+            expect(tb).to.eql([1]);
+        });
+        it('fill table 1', function () {
+            rs.reset();
+            var tb;
+            var result = {
+                '0': 1, '1': 0, '2': 0, '3': 5, '4': 0, '5': 6, '6': 5, '7': 0, '8': 0, '9': 5, '10': 6
+            }
+            tb = rs.filltable(1);
+            expect(tb.length).to.eql(4096);
+            for (var i = 0; i < 10; i++)  expect(tb[i]).to.eql(result[i]);
+        });
+        it('fill table 2, size should be 6561', function () {
+            rs.reset();
+            var tb;
+            var result = [];
+            tb = rs.filltable(2);
+            expect(tb.length).to.eql(6561);
+            for (var i = 0; i < 10; i++)  expect(tb[i]).to.eql(result[i]);
+        });
+        it('fill table 3, size should be 4096', function () {
+            rs.reset();
+            var tb;
+            var result = [];
+            tb = rs.filltable(3);
+            expect(tb.length).to.eql(4096);
+            for (var i = 0; i < 10; i++)  expect(tb[i]).to.eql(result[i]);
         });
     });
     describe('#searchphase', function () {

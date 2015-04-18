@@ -425,7 +425,7 @@ function RubikSolver() {
            this.debug(tb[i]);
         }
         this.debug("<br/>End fill table<br/>");
-
+        return tb;
     }
 
     /**
