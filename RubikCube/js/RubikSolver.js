@@ -27,6 +27,54 @@ function Car() {
     }
 }
 
+//其中s是把6*3*3的数组，用逗号按顺序连接成的字符串
+/**
+ *
+ * @param s
+ * @constructor
+ */
+function SolveReadColors(s) {
+    string[]
+    ArrColors = s.Split(',');
+    ;
+    string
+    sInput = "";
+    string
+    ReadQ = "URDLFB";
+    string[]
+    PosQ = new string[6];
+    for (int i = 0;
+    i < 6;
+    i++
+)
+    PosQ[Convert.ToInt32(ArrColors[4 + i * 9]) - 1] = ReadQ[i].ToString();
+
+    sInput += PosQ[Convert.ToInt32(ArrColors[7]) - 1] + PosQ[Convert.ToInt32(ArrColors[37]) - 1] + " ";  //UF
+    sInput += PosQ[Convert.ToInt32(ArrColors[5]) - 1] + PosQ[Convert.ToInt32(ArrColors[12]) - 1] + " ";  //UR
+    sInput += PosQ[Convert.ToInt32(ArrColors[1]) - 1] + PosQ[Convert.ToInt32(ArrColors[52]) - 1] + " ";  //UB
+    sInput += PosQ[Convert.ToInt32(ArrColors[3]) - 1] + PosQ[Convert.ToInt32(ArrColors[32]) - 1] + " ";  //UL
+    sInput += PosQ[Convert.ToInt32(ArrColors[25]) - 1] + PosQ[Convert.ToInt32(ArrColors[43]) - 1] + " ";  //DF
+    sInput += PosQ[Convert.ToInt32(ArrColors[21]) - 1] + PosQ[Convert.ToInt32(ArrColors[14]) - 1] + " ";  //DR
+    sInput += PosQ[Convert.ToInt32(ArrColors[19]) - 1] + PosQ[Convert.ToInt32(ArrColors[46]) - 1] + " ";  //DB
+    sInput += PosQ[Convert.ToInt32(ArrColors[23]) - 1] + PosQ[Convert.ToInt32(ArrColors[30]) - 1] + " ";  //DL
+    sInput += PosQ[Convert.ToInt32(ArrColors[41]) - 1] + PosQ[Convert.ToInt32(ArrColors[16]) - 1] + " ";  //FR
+    sInput += PosQ[Convert.ToInt32(ArrColors[39]) - 1] + PosQ[Convert.ToInt32(ArrColors[34]) - 1] + " ";  //FL
+    sInput += PosQ[Convert.ToInt32(ArrColors[50]) - 1] + PosQ[Convert.ToInt32(ArrColors[10]) - 1] + " ";  //BR
+    sInput += PosQ[Convert.ToInt32(ArrColors[48]) - 1] + PosQ[Convert.ToInt32(ArrColors[28]) - 1] + " ";  //BL
+
+    sInput += PosQ[Convert.ToInt32(ArrColors[8]) - 1] + PosQ[Convert.ToInt32(ArrColors[38]) - 1] + PosQ[Convert.ToInt32(ArrColors[15]) - 1] + " ";  //UFR
+    sInput += PosQ[Convert.ToInt32(ArrColors[2]) - 1] + PosQ[Convert.ToInt32(ArrColors[9]) - 1] + PosQ[Convert.ToInt32(ArrColors[53]) - 1] + " ";  //URB
+    sInput += PosQ[Convert.ToInt32(ArrColors[0]) - 1] + PosQ[Convert.ToInt32(ArrColors[51]) - 1] + PosQ[Convert.ToInt32(ArrColors[29]) - 1] + " ";  //UBL
+    sInput += PosQ[Convert.ToInt32(ArrColors[6]) - 1] + PosQ[Convert.ToInt32(ArrColors[35]) - 1] + PosQ[Convert.ToInt32(ArrColors[36]) - 1] + " ";  //ULF
+
+    sInput += PosQ[Convert.ToInt32(ArrColors[24]) - 1] + PosQ[Convert.ToInt32(ArrColors[17]) - 1] + PosQ[Convert.ToInt32(ArrColors[44]) - 1] + " ";  //DRF
+    sInput += PosQ[Convert.ToInt32(ArrColors[26]) - 1] + PosQ[Convert.ToInt32(ArrColors[42]) - 1] + PosQ[Convert.ToInt32(ArrColors[33]) - 1] + " ";  //DFL
+    sInput += PosQ[Convert.ToInt32(ArrColors[20]) - 1] + PosQ[Convert.ToInt32(ArrColors[27]) - 1] + PosQ[Convert.ToInt32(ArrColors[45]) - 1] + " ";  //DLB
+    sInput += PosQ[Convert.ToInt32(ArrColors[18]) - 1] + PosQ[Convert.ToInt32(ArrColors[47]) - 1] + PosQ[Convert.ToInt32(ArrColors[11]) - 1];  //DBR
+
+    ResultSteps = RubikSolve.GetResult(sInput);
+}
+
 function RubikSolver() {
     var faces = "RLFBUD";
     var order = "AECGBFDHIJKLMSNTROQP".split("");

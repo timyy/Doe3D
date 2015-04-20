@@ -124,7 +124,7 @@ function setupLogo() {
     stickerLogo[0].classList.remove('stickerLogo');
   }
   cube.twistDuration = 0;
-  var LOGO_SEQUENCE = 'zzxLFFRDuFLUrl';
+    var LOGO_SEQUENCE = 'zzxLFFRDuFLUrl';  //TODO: 这里是初使化。
   cube.twistCountDown = LOGO_SEQUENCE.length;
   scopedCheckQueue = checkQueue.bind(this, startScrambleAnimation);
   cube.addEventListener('onTwistComplete', scopedCheckQueue);
@@ -272,7 +272,8 @@ function scrambleCube() {
   .easing(TWEEN.Easing.Quartic.InOut)
   .start(cube.time);
   cube.twistDuration = 120;
-  var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';
+//  var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';
+    var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';    //todo 这里是初使化模方。
   cube.twistCountDown =
       WCA_SCRAMBLE_SHORT.length + cube.twistQueue.history.length;
   cube.twist(WCA_SCRAMBLE_SHORT);
