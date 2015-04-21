@@ -202,18 +202,19 @@ function startInteractiveCube() {
     }
     postParentMessage({'moves': cube.moveCounter});
     if (cube.isSolved()) {
-      setTimeout(function() {
-        cube.hideInvisibleFaces = false;
-        cube.showIntroverts();
-        if (shadow && shadow.domElement) {
-          shadow.domElement.style.opacity = '0';
-        }
-        if (!sentCertificate) {
-          sentCertificate = true;
-          doCertificate();
-          postParentMessage({'certificate': 1});
-        }
-      }, 1000);
+        //todo 先不分解cube
+        //setTimeout(function() {
+        //  cube.hideInvisibleFaces = false;
+        //  cube.showIntroverts();
+        //  if (shadow && shadow.domElement) {
+        //    shadow.domElement.style.opacity = '0';
+        //  }
+        //  if (!sentCertificate) {
+        //    sentCertificate = true;
+        //    doCertificate();
+        //    postParentMessage({'certificate': 1});
+        //  }
+        //}, 1000);
     }
   });
   moveCounter.innerText = moveCounter.textContent = cube.moveCounter;
@@ -274,6 +275,8 @@ function scrambleCube() {
   cube.twistDuration = 120;
 //  var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';
     var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';    //todo 这里是初使化模方。
+    //zzxLFFRDuFLUrl 回到
+    var WCA_SCRAMBLE_SHORT = 'LRulfUdrffl';
   cube.twistCountDown =
       WCA_SCRAMBLE_SHORT.length + cube.twistQueue.history.length;
   cube.twist(WCA_SCRAMBLE_SHORT);
