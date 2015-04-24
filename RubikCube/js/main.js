@@ -272,11 +272,14 @@ function scrambleCube() {
       }, 3000)
   .easing(TWEEN.Easing.Quartic.InOut)
   .start(cube.time);
-  cube.twistDuration = 120;
+    cube.twistDuration = 1; //120;
 //  var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';
     var WCA_SCRAMBLE_SHORT = 'ddurrdllrBffDUbffdurfdUbll';    //todo 这里是初使化模方。
     //zzxLFFRDuFLUrl 回到
-    var WCA_SCRAMBLE_SHORT = 'LRulfUdrffl';
+    var WCA_SCRAMBLE_SHORT = 'LRulfUdrffl'; // 初始化的逆运算，让魔方回到解好的状态
+    // WCA_SCRAMBLE_SHORT +="D1 B3 F1 U3 B1 L2 U3 B2 D3 L2 U1 R1 D1 F2 D1 L2 D2 B2 D3 L2 D1 B2 U2 L2 D2 B2 U2 L2 B2 R2"
+    WCA_SCRAMBLE_SHORT += "RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd"
+
   cube.twistCountDown =
       WCA_SCRAMBLE_SHORT.length + cube.twistQueue.history.length;
   cube.twist(WCA_SCRAMBLE_SHORT);
