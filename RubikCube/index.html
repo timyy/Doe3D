@@ -152,8 +152,13 @@
         + dic[window.cube.back.cubelets[8][ERNO.Direction.BACK.name].color.initial]
         + dic[window.cube.right.cubelets[0][ERNO.Direction.RIGHT.name].color.initial]; //DBR RBU
 
-        cont += sInput + "<br/>解法：";
-        cont += rs.GetResult(sInput)
+        cont += sInput + "<br/>解法1：";
+        cont += rs.GetResult(sInput);
+        cont += "<br/>解法2：";
+        var SCRAMBLE = rs.GetResultGoogle(sInput);
+        cont += SCRAMBLE;
+        cube.twistDuration = 240;
+        window.cube.twist(SCRAMBLE);
         // URDLFB
         cont += "<br/>F:";
         cont += window.cube.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial;

@@ -117,6 +117,37 @@ function RubikSolver() {
         return sOutput;
     }
 
+    RubikSolver.prototype.GetResultGoogle = function (sInput) {
+        var result = "";
+        var resultGoogle = "";
+        var action = "";
+        var actionTime = "";
+        var deal;
+
+        result = this.GetResult(sInput);
+        deal = result.split(' ');
+        //for(var i=0; i<deal.length -1;i++){
+        //    action=deal[i][0];
+        //    actionTime = deal[i][1].charCodeAt(0)-48;
+        //    for(var j=0; j<actionTime;j++)
+        //        resultGoogle += action;
+        //}
+        deal.forEach(function (d) {
+            action = d[0];
+            actionTime = parseInt(d[1]); //从字符转为数字
+            switch (actionTime) {
+                case 3: //正转三次就是反转
+                    resultGoogle += action.toLowerCase();
+                    break;
+                default:
+                    for (var i = 0; i < actionTime; i++)
+                        resultGoogle += action;
+                    break;
+            }
+
+        });
+        return resultGoogle;
+    }
 
     this.debug = function (s) {
         if (isDebug) {

@@ -14,17 +14,30 @@ describe('Car 测试变量 ', function () {
 });
 describe('RubikSolver', function () {
     var rs = new RubikSolver();
-    it('#GetResult 1', function () {
-        var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU";
-        var OutputText = "D1 B3 F1 U3 B1 L2 U3 B2 D3 L2 U1 R1 D1 F2 D1 L2 D2 B2 D3 L2 D1 B2 U2 L2 D2 B2 U2 L2 B2 R2 ";
-        expect(rs.GetResult(InputText)).to.eql(OutputText);
+    describe('#GetResult', function () {
+        it('GetResult 1', function () {
+            var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU";
+            var OutputText = "D1 B3 F1 U3 B1 L2 U3 B2 D3 L2 U1 R1 D1 F2 D1 L2 D2 B2 D3 L2 D1 B2 U2 L2 D2 B2 U2 L2 B2 R2 ";
+            expect(rs.GetResult(InputText)).to.eql(OutputText);
+        });
+        it('GetResult 2, 已经解好的。', function () {
+            var InputText = "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
+            var OutputText = "";
+            expect(rs.GetResult(InputText)).to.eql(OutputText);
+        });
     });
-    it('#GetResult 2, 已经解好的。', function () {
-        var InputText = "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
-        var OutputText = "";
-        expect(rs.GetResult(InputText)).to.eql(OutputText);
+    describe('#GetResultGoogle', function () {
+        it('GetResultGoogle 1', function () {
+            var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU";
+            var OutputText = "DBBBFUUUBLLUUUBBDDDLLURDFFDLLDDBBDDDLLDBBUULLDDBBUULLBBRR";
+            expect(rs.GetResultGoogle(InputText)).to.eql(OutputText);
+        });
+        it('GetResult 2, 已经解好的。', function () {
+            var InputText = "UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR";
+            var OutputText = "";
+            expect(rs.GetResultGoogle(InputText)).to.eql(OutputText);
+        });
     });
-
     describe('#Char2Num', function () {
         it('#0 ', function () {
             // expect(rs.GetResult("RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU")).to.eql("D1 R3");
