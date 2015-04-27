@@ -1,17 +1,29 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <style>
+        #infoDebug {
+            color: #f00;
+            position: absolute;
+            top: 10px;
+            width: 20%;
+            text-align: right;
+            z-index: 100;
+            display: block;
+        }
+    </style>
     <script src="RubikCube/js/RubikSolver.js"></script>
 </head>
 <body>
+<div id="infoDebug"></div>
     <script>
         var rs = new RubikSolver();
         var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU"
 
-        console.trace(InputText);
+        rs.debug(InputText);
         document.write(InputText + "<br/>");
         var OutputText = rs.GetResult(InputText);
-        console.trace(OutputText);
+        rs.debug(OutputText);
         document.write( "<br/><font color=\"red\">" + OutputText + "</font><br/>");
 
         str = "A";

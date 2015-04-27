@@ -1714,6 +1714,78 @@
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(a, b)
         }, PRESERVE_LOGO: "RrLlUuDdSsBb", ALL_SLICES: "RrMmLlUuEeDdFfSsBb", EVERYTHING: "XxRrMmLlYyUuEeDdZzFfSsBb",
+        //todo add function
+        /**
+         *
+         * 获取urdlfb表示法
+         * UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+         *
+         * @returns {string}
+         */
+        getURDLFB: function () {
+            var dic = new Array(6);
+            // var ReadQ = "URDLFB";
+            var sInput = "";
+            // 取每个中心面的颜色，做成字典。
+            dic[this.up.cubelets[4][ERNO.Direction.UP.name].color.initial] = "U";
+            dic[this.right.cubelets[4][ERNO.Direction.RIGHT.name].color.initial] = "R";
+            dic[this.down.cubelets[4][ERNO.Direction.DOWN.name].color.initial] = "D";
+            dic[this.left.cubelets[4][ERNO.Direction.LEFT.name].color.initial] = "L";
+            dic[this.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial] = "F";
+            dic[this.back.cubelets[4][ERNO.Direction.BACK.name].color.initial] = "B";
+
+            // UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 解好的
+            sInput += dic[this.up.cubelets[1][ERNO.Direction.UP.name].color.initial]
+            + dic[this.front.cubelets[7][ERNO.Direction.FRONT.name].color.initial] + " "; //UF
+            sInput += dic[this.up.cubelets[3][ERNO.Direction.UP.name].color.initial]
+            + dic[this.right.cubelets[7][ERNO.Direction.RIGHT.name].color.initial] + " "; //UR
+            sInput += dic[this.up.cubelets[7][ERNO.Direction.UP.name].color.initial]
+            + dic[this.back.cubelets[3][ERNO.Direction.BACK.name].color.initial] + " "; //UB UB
+            sInput += dic[this.up.cubelets[5][ERNO.Direction.UP.name].color.initial]
+            + dic[this.left.cubelets[3][ERNO.Direction.LEFT.name].color.initial] + " "; //UL
+            sInput += dic[this.down.cubelets[5][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.front.cubelets[1][ERNO.Direction.FRONT.name].color.initial] + " "; //DF
+            sInput += dic[this.down.cubelets[7][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.right.cubelets[1][ERNO.Direction.RIGHT.name].color.initial] + " "; //DR
+            sInput += dic[this.down.cubelets[3][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.back.cubelets[5][ERNO.Direction.BACK.name].color.initial] + " "; //DB
+            sInput += dic[this.down.cubelets[1][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.left.cubelets[5][ERNO.Direction.LEFT.name].color.initial] + " "; //DL
+            sInput += dic[this.front.cubelets[3][ERNO.Direction.FRONT.name].color.initial]
+            + dic[this.right.cubelets[5][ERNO.Direction.RIGHT.name].color.initial] + " "; //FR
+            sInput += dic[this.front.cubelets[5][ERNO.Direction.FRONT.name].color.initial]
+            + dic[this.left.cubelets[1][ERNO.Direction.LEFT.name].color.initial] + " "; //FL //
+            sInput += dic[this.back.cubelets[7][ERNO.Direction.BACK.name].color.initial]
+            + dic[this.right.cubelets[3][ERNO.Direction.RIGHT.name].color.initial] + " "; //BR BR
+            sInput += dic[this.back.cubelets[1][ERNO.Direction.BACK.name].color.initial]
+            + dic[this.left.cubelets[7][ERNO.Direction.LEFT.name].color.initial] + " "; //BL fd
+            sInput += dic[this.up.cubelets[0][ERNO.Direction.UP.name].color.initial]
+            + dic[this.front.cubelets[6][ERNO.Direction.FRONT.name].color.initial]
+            + dic[this.right.cubelets[8][ERNO.Direction.RIGHT.name].color.initial] + " "; //UFR LDF
+            sInput += dic[this.up.cubelets[6][ERNO.Direction.UP.name].color.initial]
+            + dic[this.right.cubelets[6][ERNO.Direction.RIGHT.name].color.initial]
+            + dic[this.back.cubelets[6][ERNO.Direction.BACK.name].color.initial] + " "; //URB LBD
+// UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 解好的
+            sInput += dic[this.up.cubelets[8][ERNO.Direction.UP.name].color.initial]
+            + dic[this.back.cubelets[0][ERNO.Direction.BACK.name].color.initial]
+            + dic[this.left.cubelets[6][ERNO.Direction.LEFT.name].color.initial] + " "; //UBL FUL
+            sInput += dic[this.up.cubelets[2][ERNO.Direction.UP.name].color.initial]
+            + dic[this.left.cubelets[0][ERNO.Direction.LEFT.name].color.initial]
+            + dic[this.front.cubelets[8][ERNO.Direction.FRONT.name].color.initial] + " "; //ULF RFD
+            sInput += dic[this.down.cubelets[8][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.right.cubelets[2][ERNO.Direction.RIGHT.name].color.initial]
+            + dic[this.front.cubelets[0][ERNO.Direction.FRONT.name].color.initial] + " "; //DRF UFR
+            sInput += dic[this.down.cubelets[2][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.front.cubelets[2][ERNO.Direction.FRONT.name].color.initial]
+            + dic[this.left.cubelets[2][ERNO.Direction.LEFT.name].color.initial] + " "; //DFL RDB
+            sInput += dic[this.down.cubelets[0][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.left.cubelets[8][ERNO.Direction.LEFT.name].color.initial]
+            + dic[this.back.cubelets[2][ERNO.Direction.BACK.name].color.initial] + " "; //DLB UBL
+            sInput += dic[this.down.cubelets[6][ERNO.Direction.DOWN.name].color.initial]
+            + dic[this.back.cubelets[8][ERNO.Direction.BACK.name].color.initial]
+            + dic[this.right.cubelets[0][ERNO.Direction.RIGHT.name].color.initial]; //DBR RBU
+            return sInput;
+        },
         loop: function () {
             var a = 0;
             return function () {

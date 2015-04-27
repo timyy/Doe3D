@@ -13,6 +13,16 @@
             z-index: 100;
             display: block;
         }
+
+        #infoDebug {
+            color: #f00;
+            position: absolute;
+            top: 10px;
+            width: 20%;
+            text-align: center;
+            z-index: 100;
+            display: block;
+        }
     </style>
     <link rel="stylesheet" type="text/css" href="js/cube.css">
     <link rel="stylesheet" type="text/css" href="js/doodle.css">
@@ -43,9 +53,12 @@
 </div>
 <div id="infopanel">
     <div id="info"><font size="3" color="red">This is some text!</font>显示解法</div>
-    <button value="" onclick="javascript:button_onclick();" type="button">获得表示，并显示解</button>
-    <button value="" onclick="javascript:btnAutoSolver();" type="button">undo方式演示</button>
+    <div id="infoSolver"></div>
+    <button value="" onclick="button_onclick();" type="button">获得表示，并显示解</button>
+    <button value="" onclick="btnSolver();" type="button">按上面的方法，自动解</button>
+    <button value="" onclick="btnAutoSolver();" type="button">undo方式演示</button>
 </div>
+<div id="infoDebug"></div>
 <div id="uipanel" class="fadeTransition">
     <div id="movecounter">0</div>
     <div id="buttonpanel">
@@ -86,79 +99,26 @@
 <script charset="utf-8" src="js/RubikSolver.js"></script>
 <script>
     function button_onclick() {
-        rs = new RubikSolver();
-        var cont = "";
         var dic = new Array(6);
-        var ReadQ = "URDLFB";
-        var sInput = "";
         // 取每个中心面的颜色，做成字典。
-        dic[window.cube.up.cubelets[4][ERNO.Direction.UP.name].color.initial] = "U";
-        dic[window.cube.right.cubelets[4][ERNO.Direction.RIGHT.name].color.initial] = "R";
-        dic[window.cube.down.cubelets[4][ERNO.Direction.DOWN.name].color.initial] = "D";
-        dic[window.cube.left.cubelets[4][ERNO.Direction.LEFT.name].color.initial] = "L";
-        dic[window.cube.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial] = "F";
-        dic[window.cube.back.cubelets[4][ERNO.Direction.BACK.name].color.initial] = "B";
+        dic[cube.up.cubelets[4][ERNO.Direction.UP.name].color.initial] = "U";
+        dic[cube.right.cubelets[4][ERNO.Direction.RIGHT.name].color.initial] = "R";
+        dic[cube.down.cubelets[4][ERNO.Direction.DOWN.name].color.initial] = "D";
+        dic[cube.left.cubelets[4][ERNO.Direction.LEFT.name].color.initial] = "L";
+        dic[cube.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial] = "F";
+        dic[cube.back.cubelets[4][ERNO.Direction.BACK.name].color.initial] = "B";
 
-        cont = window.cube.getText();
-        cont += "<br/>"
-        // UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 解好的
-        sInput += dic[window.cube.up.cubelets[1][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.front.cubelets[7][ERNO.Direction.FRONT.name].color.initial] + " "; //UF
-        sInput += dic[window.cube.up.cubelets[3][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.right.cubelets[7][ERNO.Direction.RIGHT.name].color.initial] + " "; //UR
-        sInput += dic[window.cube.up.cubelets[7][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.back.cubelets[3][ERNO.Direction.BACK.name].color.initial] + " "; //UB UB
-        sInput += dic[window.cube.up.cubelets[5][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.left.cubelets[3][ERNO.Direction.LEFT.name].color.initial] + " "; //UL
-        sInput += dic[window.cube.down.cubelets[5][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.front.cubelets[1][ERNO.Direction.FRONT.name].color.initial] + " "; //DF
-        sInput += dic[window.cube.down.cubelets[7][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.right.cubelets[1][ERNO.Direction.RIGHT.name].color.initial] + " "; //DR
-        sInput += dic[window.cube.down.cubelets[3][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.back.cubelets[5][ERNO.Direction.BACK.name].color.initial] + " "; //DB
-        sInput += dic[window.cube.down.cubelets[1][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.left.cubelets[5][ERNO.Direction.LEFT.name].color.initial] + " "; //DL
-        sInput += dic[window.cube.front.cubelets[3][ERNO.Direction.FRONT.name].color.initial]
-        + dic[window.cube.right.cubelets[5][ERNO.Direction.RIGHT.name].color.initial] + " "; //FR
-        sInput += dic[window.cube.front.cubelets[5][ERNO.Direction.FRONT.name].color.initial]
-        + dic[window.cube.left.cubelets[1][ERNO.Direction.LEFT.name].color.initial] + " "; //FL //
-        sInput += dic[window.cube.back.cubelets[7][ERNO.Direction.BACK.name].color.initial]
-        + dic[window.cube.right.cubelets[3][ERNO.Direction.RIGHT.name].color.initial] + " "; //BR BR
-        sInput += dic[window.cube.back.cubelets[1][ERNO.Direction.BACK.name].color.initial]
-        + dic[window.cube.left.cubelets[7][ERNO.Direction.LEFT.name].color.initial] + " "; //BL fd
-        sInput += dic[window.cube.up.cubelets[0][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.front.cubelets[6][ERNO.Direction.FRONT.name].color.initial]
-        + dic[window.cube.right.cubelets[8][ERNO.Direction.RIGHT.name].color.initial] + " "; //UFR LDF
-        sInput += dic[window.cube.up.cubelets[6][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.right.cubelets[6][ERNO.Direction.RIGHT.name].color.initial]
-        + dic[window.cube.back.cubelets[6][ERNO.Direction.BACK.name].color.initial] + " "; //URB LBD
-// UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 解好的
-        sInput += dic[window.cube.up.cubelets[8][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.back.cubelets[0][ERNO.Direction.BACK.name].color.initial]
-        + dic[window.cube.left.cubelets[6][ERNO.Direction.LEFT.name].color.initial] + " "; //UBL FUL
-        sInput += dic[window.cube.up.cubelets[2][ERNO.Direction.UP.name].color.initial]
-        + dic[window.cube.left.cubelets[0][ERNO.Direction.LEFT.name].color.initial]
-        + dic[window.cube.front.cubelets[8][ERNO.Direction.FRONT.name].color.initial] + " "; //ULF RFD
-        sInput += dic[window.cube.down.cubelets[8][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.right.cubelets[2][ERNO.Direction.RIGHT.name].color.initial]
-        + dic[window.cube.front.cubelets[0][ERNO.Direction.FRONT.name].color.initial] + " "; //DRF UFR
-        sInput += dic[window.cube.down.cubelets[2][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.front.cubelets[2][ERNO.Direction.FRONT.name].color.initial]
-        + dic[window.cube.left.cubelets[2][ERNO.Direction.LEFT.name].color.initial] + " "; //DFL RDB
-        sInput += dic[window.cube.down.cubelets[0][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.left.cubelets[8][ERNO.Direction.LEFT.name].color.initial]
-        + dic[window.cube.back.cubelets[2][ERNO.Direction.BACK.name].color.initial] + " "; //DLB UBL
-        sInput += dic[window.cube.down.cubelets[6][ERNO.Direction.DOWN.name].color.initial]
-        + dic[window.cube.back.cubelets[8][ERNO.Direction.BACK.name].color.initial]
-        + dic[window.cube.right.cubelets[0][ERNO.Direction.RIGHT.name].color.initial]; //DBR RBU
-
+        var rs = new RubikSolver();
+        var cont = "";
+        // var ReadQ = "URDLFB";
+        var sInput = "";
+        sInput = window.cube.getURDLFB();
         cont += sInput + "<br/>解法1：";
         cont += rs.GetResult(sInput);
         cont += "<br/>解法2：";
         var SCRAMBLE = rs.GetResultGoogle(sInput);
         cont += SCRAMBLE;
-        cube.twistDuration = 240;
-        window.cube.twist(SCRAMBLE);
+
         // URDLFB
         cont += "<br/>F:";
         cont += window.cube.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial;
@@ -194,49 +154,29 @@
             cont += d[ERNO.Direction.BACK.name].color.name + ',';
         });
         document.getElementById('info').innerHTML = cont;
+        document.getElementById('infoSolver').innerHTML = SCRAMBLE;
+    }
 
-//        sInput += PosQ[Convert.ToInt32(ArrColors[7]) - 1] + PosQ[Convert.ToInt32(ArrColors[37]) - 1] + " ";  //UF
-//        sInput += PosQ[Convert.ToInt32(ArrColors[5]) - 1] + PosQ[Convert.ToInt32(ArrColors[12]) - 1] + " ";  //UR
-//        sInput += PosQ[Convert.ToInt32(ArrColors[1]) - 1] + PosQ[Convert.ToInt32(ArrColors[52]) - 1] + " ";  //UB
-//        sInput += PosQ[Convert.ToInt32(ArrColors[3]) - 1] + PosQ[Convert.ToInt32(ArrColors[32]) - 1] + " ";  //UL
-//        sInput += PosQ[Convert.ToInt32(ArrColors[25]) - 1] + PosQ[Convert.ToInt32(ArrColors[43]) - 1] + " ";  //DF
-//        sInput += PosQ[Convert.ToInt32(ArrColors[21]) - 1] + PosQ[Convert.ToInt32(ArrColors[14]) - 1] + " ";  //DR
-//        sInput += PosQ[Convert.ToInt32(ArrColors[19]) - 1] + PosQ[Convert.ToInt32(ArrColors[46]) - 1] + " ";  //DB
-//        sInput += PosQ[Convert.ToInt32(ArrColors[23]) - 1] + PosQ[Convert.ToInt32(ArrColors[30]) - 1] + " ";  //DL
-//        sInput += PosQ[Convert.ToInt32(ArrColors[41]) - 1] + PosQ[Convert.ToInt32(ArrColors[16]) - 1] + " ";  //FR
-//        sInput += PosQ[Convert.ToInt32(ArrColors[39]) - 1] + PosQ[Convert.ToInt32(ArrColors[34]) - 1] + " ";  //FL
-//        sInput += PosQ[Convert.ToInt32(ArrColors[50]) - 1] + PosQ[Convert.ToInt32(ArrColors[10]) - 1] + " ";  //BR
-//        sInput += PosQ[Convert.ToInt32(ArrColors[48]) - 1] + PosQ[Convert.ToInt32(ArrColors[28]) - 1] + " ";  //BL
-//
-//        sInput += PosQ[Convert.ToInt32(ArrColors[8]) - 1] + PosQ[Convert.ToInt32(ArrColors[38]) - 1] + PosQ[Convert.ToInt32(ArrColors[15]) - 1] + " ";  //UFR
-//        sInput += PosQ[Convert.ToInt32(ArrColors[2]) - 1] + PosQ[Convert.ToInt32(ArrColors[9]) - 1] + PosQ[Convert.ToInt32(ArrColors[53]) - 1] + " ";  //URB
-//        sInput += PosQ[Convert.ToInt32(ArrColors[0]) - 1] + PosQ[Convert.ToInt32(ArrColors[51]) - 1] + PosQ[Convert.ToInt32(ArrColors[29]) - 1] + " ";  //UBL
-//        sInput += PosQ[Convert.ToInt32(ArrColors[6]) - 1] + PosQ[Convert.ToInt32(ArrColors[35]) - 1] + PosQ[Convert.ToInt32(ArrColors[36]) - 1] + " ";  //ULF
-//
-//        sInput += PosQ[Convert.ToInt32(ArrColors[24]) - 1] + PosQ[Convert.ToInt32(ArrColors[17]) - 1] + PosQ[Convert.ToInt32(ArrColors[44]) - 1] + " ";  //DRF
-//        sInput += PosQ[Convert.ToInt32(ArrColors[26]) - 1] + PosQ[Convert.ToInt32(ArrColors[42]) - 1] + PosQ[Convert.ToInt32(ArrColors[33]) - 1] + " ";  //DFL
-//        sInput += PosQ[Convert.ToInt32(ArrColors[20]) - 1] + PosQ[Convert.ToInt32(ArrColors[27]) - 1] + PosQ[Convert.ToInt32(ArrColors[45]) - 1] + " ";  //DLB
-//        sInput += PosQ[Convert.ToInt32(ArrColors[18]) - 1] + PosQ[Convert.ToInt32(ArrColors[47]) - 1] + PosQ[Convert.ToInt32(ArrColors[11]) - 1];  //DBR
+    function btnSolver() {
+        var sInput;
+        var rs = new RubikSolver();
 
-//          isSolved: function (a) {
-//          if (a) {
-//              var b = {}, c = 0;
-//              a instanceof ERNO.Direction && (a = a.name);
-//              this.cubelets.forEach(function (d) {
-//                  d =
-//                          d[a].color.name;
-//                  void 0 === b[d] ? (b[d] = 1, c++) : b[d]++
-//              });
-//              return 1 === c ? !0 : !1
-//          }
-//              this.front.isSolved(ERNO.Direction.FRONT)
-
+        sInput = window.cube.getURDLFB();
+        var SCRAMBLE = rs.GetResultGoogle(sInput);
+        cube.twistDuration = 240;
+        window.cube.twist(SCRAMBLE);
     }
     function btnAutoSolver() {
         document.getElementById('info').innerHTML = "开始自动解魔方演示";
         solveCube(500);
 
         // window.cube.twist("r");
+    }
+    /**
+     * 第一面十字
+     */
+    function btn1C() {
+
     }
 </script>
 </body>

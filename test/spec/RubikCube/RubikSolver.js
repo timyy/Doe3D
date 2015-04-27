@@ -26,10 +26,10 @@ describe('RubikSolver', function () {
             expect(rs.GetResult(InputText)).to.eql(OutputText);
         });
     });
-    describe('#GetResultGoogle', function () {
+    describe('#GetResultGoogle 把D2改为DD,D3改为d，即反转，', function () {
         it('GetResultGoogle 1', function () {
             var InputText = "RU LF UB DR DL BL UL FU BD RF BR FD LDF LBD FUL RFD UFR RDB UBL RBU";
-            var OutputText = "DBBBFUUUBLLUUUBBDDDLLURDFFDLLDDBBDDDLLDBBUULLDDBBUULLBBRR";
+            var OutputText = "DbFuBLLuBBdLLURDFFDLLDDBBdLLDBBUULLDDBBUULLBBRR";
             expect(rs.GetResultGoogle(InputText)).to.eql(OutputText);
         });
         it('GetResult 2, 已经解好的。', function () {
@@ -49,10 +49,10 @@ describe('RubikSolver', function () {
         it('#Z returns 25', function () {
             expect(rs.Char2Num('Z')).to.eql(25);
         });
-        it('#a ', function () {
+        it('#a return 32', function () {
             expect(rs.Char2Num('a')).to.eql(32);
         });
-        it('#z ', function () {
+        it('#z return 57', function () {
             expect(rs.Char2Num('z')).to.eql(57);
         });
     });
@@ -67,7 +67,6 @@ describe('RubikSolver', function () {
         };
         beforeEach(function () {
             return rs.clear();
-            ;
         });
         describe('#cycle 1', function () {
             it('pos 1 should 8', function () {
@@ -90,7 +89,7 @@ describe('RubikSolver', function () {
 
     describe('#twist', function () {
 
-        it('twist m=0', function () {
+        it('twist m=0, ', function () {
             var m = 0;
             var perm = "AIBJTMROCLDKSNQPEKFIMSPRGJHLNTOQAGCEMTNSBFDHORPQ".split("");
             var offset = 8 * m;

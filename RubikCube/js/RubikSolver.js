@@ -11,11 +11,11 @@
  * @version %I%, %G%
  * @see github.com/timyy
  */
+
 /**
  *
  * @type {string}
  */
-
 function Car() {
     var wheel = 1;//私有变量
     this.wheel = 5;//公有变量
@@ -27,6 +27,11 @@ function Car() {
     }
 }
 
+/**
+ * RubikSolver
+ * 解魔方程序。
+ * @constructor
+ */
 function RubikSolver() {
     var faces = "RLFBUD";
     var order = "AECGBFDHIJKLMSNTROQP".split("");
@@ -42,8 +47,10 @@ function RubikSolver() {
     var tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
     var CHAROFFSET = 65;
 
-    var isDebug = false;
-
+    var isDebug = true;
+    var infoDebug = document.getElementById('infoDebug');
+    var DebugCount = 0;
+    var DebugCountMax = 1000;
     /**
      *
      * @param sInput
@@ -61,7 +68,7 @@ function RubikSolver() {
 
         var f, i = 0, pc, mor;
 
-        this.debug("<br/>开始 val: -------------<br/>")
+        this.debug("%c<br/>开始RubikSolver.GetResult<br/>", "color: #c00");
 
         for (var k = 0; k < 20; k++) {
             val[k] = (k < 12 ? 2 : 3);
@@ -149,10 +156,22 @@ function RubikSolver() {
         return resultGoogle;
     }
 
-    this.debug = function (s) {
+    this.debug = function (s, color) {
         if (isDebug) {
-            document.write(s)
+            DebugCount++;
+            if (DebugCount < DebugCountMax) { // debug 信息太多会显示不了，这种方式效率比较低
+                if (undefined == color) {
+                    console.log(s)
+                } else {
+                    console.log(s, color);
+                }
+                //infoDebug.innerHTML += s;
+                //infoDebug.style.display = 'block';
+                //infoDebug.style.pointerEvents = 'auto';
+            }
         } else {
+            //infoDebug.style.display = 'none';
+            //infoDebug.style.pointerEvents = 'none';
             // console.write(s)
         }
     }
