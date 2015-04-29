@@ -47,7 +47,7 @@ function RubikSolver() {
     var tablesize = [1, 4096, 6561, 4096, 256, 1536, 13824, 576];
     var CHAROFFSET = 65;
 
-    var isDebug = true;
+    var isDebug = false;
     var infoDebug = document.getElementById('infoDebug');
     var DebugCount = 0;
     var DebugCountMax = 1000;
