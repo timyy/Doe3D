@@ -57,6 +57,10 @@
     <button value="" onclick="button_onclick();" type="button">获得表示，并显示解</button>
     <button value="" onclick="btnSolver();" type="button">按上面的方法，自动解</button>
     <button value="" onclick="btnAutoSolver();" type="button">undo方式演示</button>
+    <button value="" onclick="btnDCSolver();" type="button">底面十字，底面四棱</button>
+    <button value="" onclick="btnDCSolver();" type="button">底面四角</button>
+    <button value="" onclick="btnDCSolver();" type="button">中间四棱</button>
+    <button value="" onclick="btnDCSolver();" type="button">二层对好，中间四棱</button>
 </div>
 <div id="infoDebug"></div>
 <div id="uipanel" class="fadeTransition">
@@ -64,7 +68,6 @@
     <div id="buttonpanel">
         <div id="sharebubble" class="fadeTransition" style="opacity:0">
             <input id="shareshortlink" type="text" value="google.com/doodles" readonly="readonly"/>
-
             <div id="sharegplus" class="bubbleicon SPRITE_google_plus_64_2x"></div>
             <div id="sharefacebook" class="bubbleicon SPRITE_facebook_64_2x"></div>
             <div id="sharetwitter" class="bubbleicon SPRITE_twitter_64_2x"></div>
@@ -164,7 +167,7 @@
         sInput = window.cube.getURDLFB();
         var SCRAMBLE = rs.GetResultGoogle(sInput);
         cube.twistDuration = 240;
-        window.cube.twist(SCRAMBLE);
+        cube.twist(SCRAMBLE);
     }
     function btnAutoSolver() {
         document.getElementById('info').innerHTML = "开始自动解魔方演示";
@@ -173,10 +176,13 @@
         // window.cube.twist("r");
     }
     /**
-     * 第一面十字
+     * 顶面十字
      */
-    function btn1C() {
-
+    function btnDCSolver() {
+        var SCRAMBLE;
+        SCRAMBLE = ERNO.SolverM.prototype.DCross(cube);
+        cube.twistDuration = 500;
+        cube.twist(SCRAMBLE);
     }
 </script>
 </body>

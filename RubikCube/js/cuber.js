@@ -1828,27 +1828,7 @@
         a.isShuffling = !1;
         return a.isSolved() ? (ERNO.Solver.prototype.explain("I\u2019ve found that the cube is already solved."), !1) : this.logic(a)
     };
-    ERNO.SolverM.prototype.testDCross = function (aCube) {
-        if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
-        if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
-        var dic = new Array(6);
-        // 取每个中心面的颜色，做成字典。
-        dic[aCube.up.cubelets[4][ERNO.Direction.UP.name].color.initial] = "U";
-        dic[aCube.right.cubelets[4][ERNO.Direction.RIGHT.name].color.initial] = "R";
-        dic[aCube.down.cubelets[4][ERNO.Direction.DOWN.name].color.initial] = "D";
-        dic[aCube.left.cubelets[4][ERNO.Direction.LEFT.name].color.initial] = "L";
-        dic[aCube.front.cubelets[4][ERNO.Direction.FRONT.name].color.initial] = "F";
-        dic[aCube.back.cubelets[4][ERNO.Direction.BACK.name].color.initial] = "B";
-        var df = dic[aCube.down.cubelets[5][ERNO.Direction.DOWN.name].color.initial]
-            + dic[aCube.front.cubelets[1][ERNO.Direction.FRONT.name].color.initial]; //DF
-        var dr = dic[aCube.down.cubelets[7][ERNO.Direction.DOWN.name].color.initial]
-            + dic[aCube.right.cubelets[1][ERNO.Direction.RIGHT.name].color.initial]; //DR
-        var db = dic[aCube.down.cubelets[3][ERNO.Direction.DOWN.name].color.initial]
-            + dic[aCube.back.cubelets[5][ERNO.Direction.BACK.name].color.initial]; //DB
-        var dl = dic[aCube.down.cubelets[1][ERNO.Direction.DOWN.name].color.initial]
-            + dic[aCube.left.cubelets[5][ERNO.Direction.LEFT.name].color.initial]; //DL
-        return ({"DL": dl, "DF": df, "DR": dr, "DB": db});
-    };
+
     /**
      * 底十字， downCross
      * @param aCube
@@ -1856,14 +1836,29 @@
     ERNO.SolverM.prototype.isDCross = function (aCube) {
         if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
         if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
-        var result = ERNO.SolverM.prototype.testDCross(aCube);
-        return ("DL" == result['DL'] && "DF" == result['DF'] && "DR" == result['DR'] && "DB" == result['DB'])
+        var sResult = aCube.getURDLFB();
+        var result = sResult.split(" ");
+        return ("DF" == result[4] && "DR" == result[5] && "DB" == result[6] && "DL" == result[7]);
     };
     ERNO.SolverM.prototype.DCross = function (aCube) {
         if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
         if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
         if (!this.isDCross(aCube)) {
+            var sDCStatus = aCube.getURDLFB();
+            // 不是顶十字就做一个出来。
+            var vDCStatus = sDCStatus.split(" ");
 
+            //判断DF是不是白色，是则转一下底。不是找一个转上来。
+
+            if ('D' == vDCStatus[4][0]) {
+                return "y";  // 就是整体做U转，把左边变为前面。
+            } else {
+                // 查看中间一层有没有白色。
+                if ('D' == vDCStatus[8][0]) {
+                    return 'f'
+                }
+
+            }
         }
     };
     window.ERNO = ERNO;

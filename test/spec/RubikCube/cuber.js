@@ -41,29 +41,6 @@ describe('Cuber 测试 ', function () {
         });
 
     });
-    describe('#ERNO.SolverM.testDCross', function () {
-        it('默认', function () {
-            var result = ERNO.SolverM.prototype.testDCross(cube);
-            expect(result).to.eql({'DL': 'DL', 'DF': 'DF', 'DR': 'DR', 'DB': 'DB'});
-        });
-        it('默认,否', function () {
-            var result = ERNO.SolverM.prototype.testDCross(cube);
-            expect(result).to.not.eql({'DL': 'DD', 'DF': 'DF', 'DR': 'DR', 'DB': 'DB'});
-        });
-        it('testDCross  RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd', function (done) {
-            var WCA_SCRAMBLE_SHORT = "RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd";
-            cube.twist(WCA_SCRAMBLE_SHORT);
-            this.timeout(3000);
-            //setTimeout(done, 10000);
-
-            setTimeout(function () {
-                var result = ERNO.SolverM.prototype.testDCross(cube);
-                console.log(result);
-                expect(result).to.eql({'DL': 'FU', 'DF': 'DL', 'DR': 'BL', 'DB': 'UL'});
-                done();
-            }, 1000);
-        });
-    });
     describe('#ERNO.SolverM.isDCross', function () {
         it('默认', function () {
             var result = ERNO.SolverM.prototype.isDCross(cube);
