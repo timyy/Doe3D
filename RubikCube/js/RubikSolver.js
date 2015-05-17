@@ -156,6 +156,10 @@ function RubikSolver() {
         return resultGoogle;
     }
 
+    RubliSolver.prototype.GetResultCFOPStep = function (sInput) {
+
+    }
+
     this.debug = function (s, color) {
         if (isDebug) {
             DebugCount++;
@@ -548,6 +552,65 @@ function RubikSolver() {
         sInput += PosQ[Convert.ToInt32(ArrColors[18]) - 1] + PosQ[Convert.ToInt32(ArrColors[47]) - 1] + PosQ[Convert.ToInt32(ArrColors[11]) - 1];  //DBR
 
         ResultSteps = RubikSolve.GetResult(sInput);
+    }
+
+
+    this.FindBorderCell = function (sInput) {
+        //return value=nLayer*100+nFirstColorCenter*10+nSecondColorCenter
+        var nReturn = 0;
+        var c1 = 0, c2 = 0;
+        //First layer
+        c1 = Sides[0][0][1];
+        c2 = Sides[5][2][1];
+        if (c1 == Color1 && c2 == Color2) return 105;
+        if (c1 == Color2 && c2 == Color1) return 150;
+        c1 = Sides[0][1][0];
+        c2 = Sides[3][1][2];
+        if (c1 == Color1 && c2 == Color2) return 103;
+        if (c1 == Color2 && c2 == Color1) return 130;
+        c1 = Sides[0][2][1];
+        c2 = Sides[4][0][1];
+        if (c1 == Color1 && c2 == Color2) return 104;
+        if (c1 == Color2 && c2 == Color1) return 140;
+        c1 = Sides[0][1][2];
+        c2 = Sides[1][1][0];
+        if (c1 == Color1 && c2 == Color2) return 101;
+        if (c1 == Color2 && c2 == Color1) return 110;
+        //Seconde Layer
+        c1 = Sides[4][1][2];
+        c2 = Sides[1][2][1];
+        if (c1 == Color1 && c2 == Color2) return 241;
+        if (c1 == Color2 && c2 == Color1) return 214;
+        c1 = Sides[4][1][0];
+        c2 = Sides[3][2][1];
+        if (c1 == Color1 && c2 == Color2) return 243;
+        if (c1 == Color2 && c2 == Color1) return 234;
+        c1 = Sides[5][1][0];
+        c2 = Sides[3][0][1];
+        if (c1 == Color1 && c2 == Color2) return 253;
+        if (c1 == Color2 && c2 == Color1) return 235;
+        c1 = Sides[5][1][2];
+        c2 = Sides[1][0][1];
+        if (c1 == Color1 && c2 == Color2) return 251;
+        if (c1 == Color2 && c2 == Color1) return 215;
+        //Third Layer
+        c1 = Sides[4][2][1];
+        c2 = Sides[2][2][1];
+        if (c1 == Color1 && c2 == Color2) return 342;
+        if (c1 == Color2 && c2 == Color1) return 324;
+        c1 = Sides[1][1][2];
+        c2 = Sides[2][1][0];
+        if (c1 == Color1 && c2 == Color2) return 312;
+        if (c1 == Color2 && c2 == Color1) return 321;
+        c1 = Sides[5][0][1];
+        c2 = Sides[2][0][1];
+        if (c1 == Color1 && c2 == Color2) return 352;
+        if (c1 == Color2 && c2 == Color1) return 325;
+        c1 = Sides[3][1][0];
+        c2 = Sides[2][1][2];
+        if (c1 == Color1 && c2 == Color2) return 332;
+        if (c1 == Color2 && c2 == Color1) return 323;
+        return 0;
     }
 
 }

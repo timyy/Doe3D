@@ -1786,6 +1786,65 @@
             + dic[this.right.cubelets[0][ERNO.Direction.RIGHT.name].color.initial]; //DBR RBU
             return sInput;
         },
+        FindBorderCell: function () {
+            //return value=nLayer*100+nFirstColorCenter*10+nSecondColorCenter
+            int
+            nReturn = 0;
+            int
+            c1 = 0, c2 = 0;
+            //First layer
+            c1 = Sides[0][0][1];
+            c2 = Sides[5][2][1];
+            if (c1 == Color1 && c2 == Color2) return 105;
+            if (c1 == Color2 && c2 == Color1) return 150;
+            c1 = Sides[0][1][0];
+            c2 = Sides[3][1][2];
+            if (c1 == Color1 && c2 == Color2) return 103;
+            if (c1 == Color2 && c2 == Color1) return 130;
+            c1 = Sides[0][2][1];
+            c2 = Sides[4][0][1];
+            if (c1 == Color1 && c2 == Color2) return 104;
+            if (c1 == Color2 && c2 == Color1) return 140;
+            c1 = Sides[0][1][2];
+            c2 = Sides[1][1][0];
+            if (c1 == Color1 && c2 == Color2) return 101;
+            if (c1 == Color2 && c2 == Color1) return 110;
+            //Seconde Layer
+            c1 = Sides[4][1][2];
+            c2 = Sides[1][2][1];
+            if (c1 == Color1 && c2 == Color2) return 241;
+            if (c1 == Color2 && c2 == Color1) return 214;
+            c1 = Sides[4][1][0];
+            c2 = Sides[3][2][1];
+            if (c1 == Color1 && c2 == Color2) return 243;
+            if (c1 == Color2 && c2 == Color1) return 234;
+            c1 = Sides[5][1][0];
+            c2 = Sides[3][0][1];
+            if (c1 == Color1 && c2 == Color2) return 253;
+            if (c1 == Color2 && c2 == Color1) return 235;
+            c1 = Sides[5][1][2];
+            c2 = Sides[1][0][1];
+            if (c1 == Color1 && c2 == Color2) return 251;
+            if (c1 == Color2 && c2 == Color1) return 215;
+            //Third Layer
+            c1 = Sides[4][2][1];
+            c2 = Sides[2][2][1];
+            if (c1 == Color1 && c2 == Color2) return 342;
+            if (c1 == Color2 && c2 == Color1) return 324;
+            c1 = Sides[1][1][2];
+            c2 = Sides[2][1][0];
+            if (c1 == Color1 && c2 == Color2) return 312;
+            if (c1 == Color2 && c2 == Color1) return 321;
+            c1 = Sides[5][0][1];
+            c2 = Sides[2][0][1];
+            if (c1 == Color1 && c2 == Color2) return 352;
+            if (c1 == Color2 && c2 == Color1) return 325;
+            c1 = Sides[3][1][0];
+            c2 = Sides[2][1][2];
+            if (c1 == Color1 && c2 == Color2) return 332;
+            if (c1 == Color2 && c2 == Color1) return 323;
+            return 0;
+        },
         loop: function () {
             var a = 0;
             return function () {
@@ -1854,7 +1913,9 @@
                 return "y";  // 就是整体做U转，把左边变为前面。
             } else {
                 // 查看中间一层有没有白色。
-                if ('D' == vDCStatus[8][0]) {
+                //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+
+                if ('D' == vDCStatus[9][0]) { //FL
                     return 'f'
                 }
 
