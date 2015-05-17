@@ -613,4 +613,38 @@ function RubikSolver() {
         return 0;
     }
 
+    /**
+     * 底十字， downCross
+     * @param aCube
+     */
+    ERNO.SolverM.prototype.isDCross = function (aCube) {
+        if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
+        if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
+        var sResult = aCube.getURDLFB();
+        var result = sResult.split(" ");
+        return ("DF" == result[4] && "DR" == result[5] && "DB" == result[6] && "DL" == result[7]);
+    };
+    ERNO.SolverM.prototype.DCross = function (aCube) {
+        if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
+        if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
+        if (!this.isDCross(aCube)) {
+            var sDCStatus = aCube.getURDLFB();
+            // 不是顶十字就做一个出来。
+            var vDCStatus = sDCStatus.split(" ");
+
+            //判断DF是不是白色，是则转一下底。不是找一个转上来。
+
+            if ('D' == vDCStatus[4][0]) {
+                return "y";  // 就是整体做U转，把左边变为前面。
+            } else {
+                // 查看中间一层有没有白色。
+                //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+
+                if ('D' == vDCStatus[9][0]) { //FL
+                    return 'f'
+                }
+
+            }
+        }
+    };
 }

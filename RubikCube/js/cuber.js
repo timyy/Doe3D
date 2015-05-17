@@ -1786,65 +1786,6 @@
             + dic[this.right.cubelets[0][ERNO.Direction.RIGHT.name].color.initial]; //DBR RBU
             return sInput;
         },
-        FindBorderCell: function () {
-            //return value=nLayer*100+nFirstColorCenter*10+nSecondColorCenter
-            int
-            nReturn = 0;
-            int
-            c1 = 0, c2 = 0;
-            //First layer
-            c1 = Sides[0][0][1];
-            c2 = Sides[5][2][1];
-            if (c1 == Color1 && c2 == Color2) return 105;
-            if (c1 == Color2 && c2 == Color1) return 150;
-            c1 = Sides[0][1][0];
-            c2 = Sides[3][1][2];
-            if (c1 == Color1 && c2 == Color2) return 103;
-            if (c1 == Color2 && c2 == Color1) return 130;
-            c1 = Sides[0][2][1];
-            c2 = Sides[4][0][1];
-            if (c1 == Color1 && c2 == Color2) return 104;
-            if (c1 == Color2 && c2 == Color1) return 140;
-            c1 = Sides[0][1][2];
-            c2 = Sides[1][1][0];
-            if (c1 == Color1 && c2 == Color2) return 101;
-            if (c1 == Color2 && c2 == Color1) return 110;
-            //Seconde Layer
-            c1 = Sides[4][1][2];
-            c2 = Sides[1][2][1];
-            if (c1 == Color1 && c2 == Color2) return 241;
-            if (c1 == Color2 && c2 == Color1) return 214;
-            c1 = Sides[4][1][0];
-            c2 = Sides[3][2][1];
-            if (c1 == Color1 && c2 == Color2) return 243;
-            if (c1 == Color2 && c2 == Color1) return 234;
-            c1 = Sides[5][1][0];
-            c2 = Sides[3][0][1];
-            if (c1 == Color1 && c2 == Color2) return 253;
-            if (c1 == Color2 && c2 == Color1) return 235;
-            c1 = Sides[5][1][2];
-            c2 = Sides[1][0][1];
-            if (c1 == Color1 && c2 == Color2) return 251;
-            if (c1 == Color2 && c2 == Color1) return 215;
-            //Third Layer
-            c1 = Sides[4][2][1];
-            c2 = Sides[2][2][1];
-            if (c1 == Color1 && c2 == Color2) return 342;
-            if (c1 == Color2 && c2 == Color1) return 324;
-            c1 = Sides[1][1][2];
-            c2 = Sides[2][1][0];
-            if (c1 == Color1 && c2 == Color2) return 312;
-            if (c1 == Color2 && c2 == Color1) return 321;
-            c1 = Sides[5][0][1];
-            c2 = Sides[2][0][1];
-            if (c1 == Color1 && c2 == Color2) return 352;
-            if (c1 == Color2 && c2 == Color1) return 325;
-            c1 = Sides[3][1][0];
-            c2 = Sides[2][1][2];
-            if (c1 == Color1 && c2 == Color2) return 332;
-            if (c1 == Color2 && c2 == Color1) return 323;
-            return 0;
-        },
         loop: function () {
             var a = 0;
             return function () {
@@ -1876,52 +1817,7 @@
         console.log("Solver says: %c " + a + " %c\n", "color: #080", "")
     };
 
-    ERNO.SolverM = function () {
-        this.logic = function (a) {
-            return !1
-        }
-    };
-    ERNO.SolverM.prototype.consider = function (a) {
-        if (void 0 === a)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
-        if (!1 === a instanceof ERNO.Cube)return console.warn("The cube argument provided is not a valid Cube."), !1;
-        a.isShuffling = !1;
-        return a.isSolved() ? (ERNO.Solver.prototype.explain("I\u2019ve found that the cube is already solved."), !1) : this.logic(a)
-    };
 
-    /**
-     * 底十字， downCross
-     * @param aCube
-     */
-    ERNO.SolverM.prototype.isDCross = function (aCube) {
-        if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
-        if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
-        var sResult = aCube.getURDLFB();
-        var result = sResult.split(" ");
-        return ("DF" == result[4] && "DR" == result[5] && "DB" == result[6] && "DL" == result[7]);
-    };
-    ERNO.SolverM.prototype.DCross = function (aCube) {
-        if (void 0 === aCube)return console.warn("A cube [Cube] argument must be specified for Solver.consider()."), !1;
-        if (!1 === aCube instanceof ERNO.Cube)return console.warn("The cube argument provided is not aCube valid Cube."), !1;
-        if (!this.isDCross(aCube)) {
-            var sDCStatus = aCube.getURDLFB();
-            // 不是顶十字就做一个出来。
-            var vDCStatus = sDCStatus.split(" ");
-
-            //判断DF是不是白色，是则转一下底。不是找一个转上来。
-
-            if ('D' == vDCStatus[4][0]) {
-                return "y";  // 就是整体做U转，把左边变为前面。
-            } else {
-                // 查看中间一层有没有白色。
-                //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
-
-                if ('D' == vDCStatus[9][0]) { //FL
-                    return 'f'
-                }
-
-            }
-        }
-    };
     window.ERNO = ERNO;
 
     window._ = _;
