@@ -229,7 +229,25 @@ describe('RubikSolver', function () {
 
         });
     });
+    describe('#isDCross', function () {
+        it('默认', function () {
+            var rs=rub
+            var result = ERNO.SolverM.prototype.isDCross(cube);
+            expect(result).to.eql(true);
+        });
+        it('DCross  RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd', function (done) {
+            var WCA_SCRAMBLE_SHORT = "RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd";
+            cube.twist(WCA_SCRAMBLE_SHORT);
+            this.timeout(3000);
+            //setTimeout(done, 10000);
 
+            setTimeout(function () {
+                var result = ERNO.SolverM.prototype.isDCross(cube);
+                expect(result).to.eql(false);
+                done();
+            }, 1000);
+        });
+    });
     //  describe('#asyncMap', function () {
     //      it('handles correct replies', function () {
     //          doe.util.asyncMap([1, 2, 3],

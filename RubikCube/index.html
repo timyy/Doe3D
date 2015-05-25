@@ -57,10 +57,13 @@
     <button value="" onclick="button_onclick();" type="button">获得表示，并显示解</button>
     <button value="" onclick="btnSolver();" type="button">按上面的方法，自动解</button>
     <button value="" onclick="btnAutoSolver();" type="button">undo方式演示</button>
-    <button value="" onclick="btnDCSolver();" type="button">底面十字，底面四棱</button>
-    <button value="" onclick="btnDCSolver();" type="button">底面四角</button>
-    <button value="" onclick="btnDCSolver();" type="button">中间四棱</button>
-    <button value="" onclick="btnDCSolver();" type="button">二层对好，中间四棱</button>
+    <button value="" onclick="btnDCSolver();" type="button">底面十字 DownCross</button>
+    <button value="" onclick="btnDownCornerSolver();" type="button">底面四角 DownCorner</button>
+    <button value="" onclick="btnSecondLayerSolver();" type="button">中间四棱 2L</button>
+    <button value="" onclick="btnUpCrossSolver();" type="button">顶十字 UpCross</button>
+    <button value="" onclick="btnUpCornerSolver();" type="button">顶面 OLL 小鱼 UpCorner</button>
+    <button value="" onclick="btnUpCrossSolver();" type="button">顶四角 小鱼 UpCorner</button>
+    <button value="" onclick=";" type="button">顶面 小鱼 UpCorner</button>
 </div>
 <div id="infoDebug"></div>
 <div id="uipanel" class="fadeTransition">
@@ -115,12 +118,13 @@
         var cont = "";
         // var ReadQ = "URDLFB";
         var sInput = "";
+        var SCRAMBLE = "";
         sInput = window.cube.getURDLFB();
         cont += sInput + "<br/>解法1：";
-        cont += rs.GetResult(sInput);
+        // cont += rs.GetResult(sInput);
         cont += "<br/>解法2：";
-        var SCRAMBLE = rs.GetResultGoogle(sInput);
-        cont += SCRAMBLE;
+        // var SCRAMBLE = rs.GetResultGoogle(sInput);
+        //cont += SCRAMBLE;
 
         // URDLFB
         cont += "<br/>F:";
@@ -179,10 +183,64 @@
      * 顶面十字
      */
     function btnDCSolver() {
+        var sCube;
+        var rs = new RubikSolver();
         var SCRAMBLE;
-        SCRAMBLE = ERNO.SolverM.prototype.DCross(cube);
-        cube.twistDuration = 500;
-        cube.twist(SCRAMBLE);
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.DownCross(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 0;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnDownCornerSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.DownCorner(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 0;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnSecondLayerSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.SecondLayer(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 0;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnUpCrossSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.UpCross(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnUpCornerSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.UpCorner(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
     }
 </script>
 </body>

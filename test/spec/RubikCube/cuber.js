@@ -41,22 +41,5 @@ describe('Cuber 测试 ', function () {
         });
 
     });
-    describe('#ERNO.SolverM.isDCross', function () {
-        it('默认', function () {
-            var result = ERNO.SolverM.prototype.isDCross(cube);
-            expect(result).to.eql(true);
-        });
-        it('DCross  RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd', function (done) {
-            var WCA_SCRAMBLE_SHORT = "RRBBLLUUBBDDLLUUBBdLLDBBDDLLdFFdruLLDBBULLbUfBd";
-            cube.twist(WCA_SCRAMBLE_SHORT);
-            this.timeout(3000);
-            //setTimeout(done, 10000);
 
-            setTimeout(function () {
-                var result = ERNO.SolverM.prototype.isDCross(cube);
-                expect(result).to.eql(false);
-                done();
-            }, 1000);
-        });
-    });
 });
