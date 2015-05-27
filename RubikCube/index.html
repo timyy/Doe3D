@@ -54,7 +54,9 @@
 <div id="infopanel">
     <div id="info"><font size="3" color="red">This is some text!</font>显示解法</div>
     <div id="infoSolver"></div>
-    <button value="" onclick="button_onclick();" type="button">获得表示，并显示解</button>
+    <button value="" onclick="button_onclick();" type="button">获得表示</button>
+
+    <button value="" onclick="btnDisplaySolver();" type="button"> 显示解</button>
     <button value="" onclick="btnSolver();" type="button">按上面的方法，自动解</button>
     <button value="" onclick="btnAutoSolver();" type="button">undo方式演示</button>
     <button value="" onclick="btnDCSolver();" type="button">底面十字 DownCross</button>
@@ -62,8 +64,10 @@
     <button value="" onclick="btnSecondLayerSolver();" type="button">中间四棱 2L</button>
     <button value="" onclick="btnUpCrossSolver();" type="button">顶十字 UpCross</button>
     <button value="" onclick="btnUpCornerSolver();" type="button">顶面 OLL 小鱼 UpCorner</button>
-    <button value="" onclick="btnUpCrossSolver();" type="button">顶四角 小鱼 UpCorner</button>
-    <button value="" onclick=";" type="button">顶面 小鱼 UpCorner</button>
+    <button value="" onclick="btnUpCornerSnapSolver();" type="button">顶四角 PLL</button>
+    <button value="" onclick="btnUpBorderSnapSolver();" type="button">顶面四边 小鱼 UpCorner</button>
+    <button value="" onclick="btnUpCrossM();" type="button">顶面 无脑十字 UpCorner</button>
+    <button value="" onclick="btnUpOllM();" type="button">顶面 无脑小鱼 UpCorner</button>
 </div>
 <div id="infoDebug"></div>
 <div id="uipanel" class="fadeTransition">
@@ -173,6 +177,17 @@
         cube.twistDuration = 240;
         cube.twist(SCRAMBLE);
     }
+    function btnDisplaySolver() {
+        var sInput;
+        var rs = new RubikSolver();
+
+        sInput = window.cube.getURDLFB();
+        var SCRAMBLE = rs.GetResultGoogle(sInput);
+        var reverse = '';
+        for (var i = SCRAMBLE.length; i > 0; i--)
+            reverse += SCRAMBLE[i - 1];
+        document.getElementById('infoSolver').innerHTML = SCRAMBLE + '\n' + reverse;
+    }
     function btnAutoSolver() {
         document.getElementById('info').innerHTML = "开始自动解魔方演示";
         solveCube(500);
@@ -237,6 +252,49 @@
 
         sCube = cube.getURDLFB();
         SCRAMBLE = rs.UpCorner(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnUpCrossM() {
+        var sCube;
+        var SCRAMBLE = 'FRUruf';
+
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnUpOllM() {
+        var sCube;
+        var SCRAMBLE = 'ruRuruuR';
+
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnUpCornerSnapSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.UpCornerSnap(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+
+    function btnUpBorderSnapSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.UpBorderSnap(sCube);
         if ("" != SCRAMBLE) {
             cube.twistDuration = 500;
             cube.twist(SCRAMBLE);

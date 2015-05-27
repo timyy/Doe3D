@@ -562,72 +562,20 @@ function RubikSolver() {
     }
 
 
-    this.FindBorderCell = function (sCube) {
-        //return value=nLayer*100+nFirstColorCenter*10+nSecondColorCenter
-        var nReturn = 0;
-        var c1 = 0, c2 = 0;
-        //First layer
-        c1 = Sides[0][0][1];
-        c2 = Sides[5][2][1];
-        if (c1 == Color1 && c2 == Color2) return 105;
-        if (c1 == Color2 && c2 == Color1) return 150;
-        c1 = Sides[0][1][0];
-        c2 = Sides[3][1][2];
-        if (c1 == Color1 && c2 == Color2) return 103;
-        if (c1 == Color2 && c2 == Color1) return 130;
-        c1 = Sides[0][2][1];
-        c2 = Sides[4][0][1];
-        if (c1 == Color1 && c2 == Color2) return 104;
-        if (c1 == Color2 && c2 == Color1) return 140;
-        c1 = Sides[0][1][2];
-        c2 = Sides[1][1][0];
-        if (c1 == Color1 && c2 == Color2) return 101;
-        if (c1 == Color2 && c2 == Color1) return 110;
-        //Seconde Layer
-        c1 = Sides[4][1][2];
-        c2 = Sides[1][2][1];
-        if (c1 == Color1 && c2 == Color2) return 241;
-        if (c1 == Color2 && c2 == Color1) return 214;
-        c1 = Sides[4][1][0];
-        c2 = Sides[3][2][1];
-        if (c1 == Color1 && c2 == Color2) return 243;
-        if (c1 == Color2 && c2 == Color1) return 234;
-        c1 = Sides[5][1][0];
-        c2 = Sides[3][0][1];
-        if (c1 == Color1 && c2 == Color2) return 253;
-        if (c1 == Color2 && c2 == Color1) return 235;
-        c1 = Sides[5][1][2];
-        c2 = Sides[1][0][1];
-        if (c1 == Color1 && c2 == Color2) return 251;
-        if (c1 == Color2 && c2 == Color1) return 215;
-        //Third Layer
-        c1 = Sides[4][2][1];
-        c2 = Sides[2][2][1];
-        if (c1 == Color1 && c2 == Color2) return 342;
-        if (c1 == Color2 && c2 == Color1) return 324;
-        c1 = Sides[1][1][2];
-        c2 = Sides[2][1][0];
-        if (c1 == Color1 && c2 == Color2) return 312;
-        if (c1 == Color2 && c2 == Color1) return 321;
-        c1 = Sides[5][0][1];
-        c2 = Sides[2][0][1];
-        if (c1 == Color1 && c2 == Color2) return 352;
-        if (c1 == Color2 && c2 == Color1) return 325;
-        c1 = Sides[3][1][0];
-        c2 = Sides[2][1][2];
-        if (c1 == Color1 && c2 == Color2) return 332;
-        if (c1 == Color2 && c2 == Color1) return 323;
-        return 0;
-    }
-
     /**
      * 底十字， downCross
-     * @param aCube
+     * @param sCube
      */
     this.isDownCross = function (sCube) {
         var vCube = sCube.split(" ");
         return ("DF" == vCube[4] && "DR" == vCube[5] && "DB" == vCube[6] && "DL" == vCube[7]);
     };
+    /**
+     *
+     * @param sCube
+     * @returns {*}
+     * @constructor
+     */
     this.DownCross = function (sCube) {
         var sSteps = '';
         if (!this.isDownCross(sCube)) {
@@ -719,6 +667,12 @@ function RubikSolver() {
         var vCube = sCube.split(" ");
         return ('DRF' == vCube[16] && "DFL" == vCube[17] && "DLB" == vCube[18] && "DBR" == vCube[19]);
     };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
     this.DownCorner = function (sCube) {
         var sSteps = '';
         //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
@@ -794,6 +748,12 @@ function RubikSolver() {
         var vCube = sCube.split(" ");
         return ('FR' == vCube[8] && "FL" == vCube[9] && "BR" == vCube[10] && "BL" == vCube[11]);
     };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
     this.SecondLayer = function (sCube) {
         // F2L
         // 解中间边，第二层边。就是那个“来去回回，送孩子回家".
@@ -867,8 +827,14 @@ function RubikSolver() {
         return nSum;
     };
     this.isUpCross = function (sCube) {
-        return (4 == this.nUpCrossCount(sCube) ? true : false);
+        return (4 == this.nUpCrossCount(sCube));
     };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
     this.UpCross = function (sCube) {
         //做顶十字。有个很好的算法，计上面的块数，== 4就是十字了，0就一个没有。2，3就是一字。
         var sSteps = '';
@@ -914,8 +880,14 @@ function RubikSolver() {
         return nSum;
     };
     this.isUpCorner = function (sCube) {
-        return (4 == this.nUpCornerCount(sCube) ? true : false);
+        return (4 == this.nUpCornerCount(sCube));
     };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
     this.UpCorner = function (sCube) {
         // 顶面颜色统一(OLL)
         //做顶面，就是要做小鱼了。
@@ -927,22 +899,23 @@ function RubikSolver() {
 
         var nSum = this.nUpCornerCount(sCube);
 
-        switch (nSum) {
+        switch (nSum) { // n有四种情况，一共有7种情况，二个小鱼，二个十，二个由，一个半田
             case 4:
                 break;
             case 0:
                 // 十字
-                if('U' == vCube[12][1] && 'U' == vCube[13][2]
-                    && 'U' == vCube[14][1] && 'U' == vCube[15][2]){ // UFR(F-U) URB(B-U) UBL(B-U) ULF(F-U)向上的十字
-                    sSteps =  'RuuruRUruRur';
+                if ('U' == vCube[12][1] && 'U' == vCube[13][2]
+                    && 'U' == vCube[14][1] && 'U' == vCube[15][2]) { // UFR(F-U) URB(B-U) UBL(B-U) ULF(F-U)向上的十字
+                    sSteps = 'RuuruRUruRur';
                 }
-                else{
-                    if('U' == vCube[12][1] && 'U' == vCube[13][2]
-                        && 'U' == vCube[14][2] && 'U' == vCube[15][1]){ // UFR(F-U) URB(B-U) UBL(L-U) ULF(L-U)
-                                                                        // 向右的十字,火箭
+                else {
+                    if ('U' == vCube[12][1] && 'U' == vCube[13][2]
+                        && 'U' == vCube[14][2] && 'U' == vCube[15][1]) { // UFR(F-U) URB(B-U) UBL(L-U) ULF(L-U)
+                        // 向右的十字,火箭
                         sSteps = 'RuuRRurruRRuuR';
-                    }else
-                    {sSteps ='y';}
+                    } else {
+                        sSteps = 'y';
+                    }
                 }
                 break;
             case 1:
@@ -959,22 +932,147 @@ function RubikSolver() {
                 }
                 break;
             case  2:
-                // 由 或者另一个型
-                if ('U' == vCube[1][0] && 'U' == vCube[3][0]) {
-                    sSteps = '';
+                // 由 或者另一个型 ,共三种型。
+                if ('U' == vCube[12][0] && 'U' == vCube[13][2]
+                    && 'U' == vCube[14][1] && 'U' == vCube[15][0]) { // UFR(U-U) URB(B-U) UBL(B-U) ULF(-U)向上的由字
+                    sSteps = 'RRdRuurDRuuR';
                 } else {
-                    if ('U' == vCube[0][0] && 'U' == vCube[1][0])
-                        sSteps = '';
+                    if ('U' == vCube[12][0] && 'U' == vCube[13][0]
+                        && 'U' == vCube[14][1] && 'U' == vCube[15][2]) { // UFR(U-U) URB(U-U) UBL(B-U) ULF(F-U)向左的由字
+                        sSteps = 'ruRuruuR'; // 不用速了，用小鱼1
+                    }
                     else {
-                        sSteps = 'y';
+                        if ('U' == vCube[12][1] && 'U' == vCube[13][0]
+                            && 'U' == vCube[14][2] && 'U' == vCube[15][0]) { // UFR(F-U) URB(U-U) UBL(L-U) ULF(U-U)半田
+                            sSteps = 'ruRuruuR';
+                        } // 不用速了，用小鱼1
+                        else {
+                            sSteps = 'y';
+                        }
                     }
                 }
                 break;
             default:
-                sSteps = '';
                 break;
         }
         return sSteps;
     };
+    this.nUpCornerSnap = function (sCube) {
+        //UFR URB UBL ULF 顶面四角朝向
+        // 12
+        var vCube = sCube.split(" ");
+        var nSum = 0;
+        nSum += (vCube[12][2] == vCube[13][1]); // UF(R) == U(R)B
+        nSum += (vCube[13][2] == vCube[14][1]); // UR(B) == U(B)L
+        nSum += (vCube[14][2] == vCube[15][1]); // UB(L) == U(L)F
+        nSum += (vCube[15][2] == vCube[12][1]); // UL(F) == U(F)R
+        return nSum;
+    };
+    this.isUpCornerSnap = function (sCube) {
+        return (4 == this.nUpCornerSnap(sCube));
+    };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
+    this.UpCornerSnap = function (sCube) {
+        // 顶面四角相同，颜色统一(PLL)
+        //做顶面角。
+        var sSteps = '';
+        //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+        //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
+        if (this.isUpCornerSnap(sCube)) return sSteps;
+        var vCube = sCube.split(" ");
 
+        var nSum = this.nUpCornerSnap(sCube);
+
+        switch (nSum) { // n有3种情况，4 就是OK了。0 就是做一下，1就是有一边相同，放右边，不在右边转一下。
+            case 4:
+                // 角全部相同
+                // 如果边和面不区配就转一下。
+                if ('F' != vCube[12][1]) { // U(F)R
+                    sSteps = 'u';
+                } // u
+                break;
+            case 0:
+                // 没有相同的角，直接做一遍公式
+                sSteps = 'xRRDDruRDDrUrX';
+                break;
+            case 1:
+                // 小鱼
+                if (vCube[12][2] == vCube[13][1]) // 右边相同, UF(R) == U(R)B
+                {
+                    sSteps = 'xRRDDruRDDrUrX';
+                }
+                else { //不同转一下，到右边相同为止。
+                    sSteps = 'y';
+                }
+                break;
+            default:
+                break;
+        }
+        return sSteps;
+    };
+    this.nUpBorderSnap = function (sCube) {
+        //UFR URB UBL ULF 顶面四边相同否
+        // 12
+        var vCube = sCube.split(" ");
+        var nSum = 0;
+        nSum += (vCube[0][1] == vCube[12][1]); // U（F） == U（F）R
+        nSum += (vCube[1][1] == vCube[13][1]); // U(R) == U(R)B
+        nSum += (vCube[2][1] == vCube[14][1]); // U(B) == U(B)L
+        nSum += (vCube[3][1] == vCube[15][1]); // U(L) == U(L)F
+        return nSum;
+    };
+    this.isUpBorderSnap = function (sCube) {
+        return (4 == this.nUpBorderSnap(sCube));
+    };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
+    this.UpBorderSnap = function (sCube) {
+        // 顶面四角相同，颜色统一(PLL)
+        //做顶面角。
+        var sSteps = '';
+        //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+        //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
+        var vCube = sCube.split(" ");
+
+        var nSum = this.nUpBorderSnap(sCube);
+
+        switch (nSum) { // n有3种情况，4 就是OK了。0 就是做一下，1就是有一边相同，看顺时还是逆时，逆时小鱼1,然后小鱼2。
+            case 4:
+                // 角全部相同
+                // 如果边和面不区配就转一下。
+                if ('F' != vCube[0][1]) { // U(F)
+                    sSteps = 'u';
+                } // u
+                break;
+            case 0:
+                // 没有相同的角，直接做一遍公式
+                sSteps = 'lUlululULULL';
+                break;
+            case 1:
+                // 有一边一致
+                if (vCube[2][1] == vCube[14][1]) // 后边相同，就可以用公式了，, U(B) == U(B)L
+                {
+                    if (vCube[0][1] == vCube[15][1])    //需要顺时针 需要将U(F) = U(L)F
+                        sSteps = 'lUlululULULL';
+                    else
+                        sSteps = 'RuRURURururr';
+                }
+                else { //不同转一下，到后边相同为止。
+                    sSteps = 'y';
+                }
+                break;
+            default:
+                break;
+        }
+        return sSteps;
+    };
 }
