@@ -674,7 +674,9 @@ function RubikSolver() {
      * @constructor
      */
     this.DownCorner = function (sCube) {
+        // F2L，有41种情况
         var sSteps = '';
+
         //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
         //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
         if (this.isDownCorner(sCube)) return sSteps;
@@ -755,7 +757,7 @@ function RubikSolver() {
      * @constructor
      */
     this.SecondLayer = function (sCube) {
-        // F2L
+        // F2L，有41种情况
         // 解中间边，第二层边。就是那个“来去回回，送孩子回家".
         var sSteps = '';
         //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
@@ -837,6 +839,7 @@ function RubikSolver() {
      */
     this.UpCross = function (sCube) {
         //做顶十字。有个很好的算法，计上面的块数，== 4就是十字了，0就一个没有。2，3就是一字。
+        // 用OLL ，可以一步成面，但是有57个公式。
         var sSteps = '';
         //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
         //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
@@ -891,6 +894,10 @@ function RubikSolver() {
     this.UpCorner = function (sCube) {
         // 顶面颜色统一(OLL)
         //做顶面，就是要做小鱼了。
+        // 第三步、顶面颜色统一(OLL)
+        // 共有57种情况
+        // 十字后有7种
+
         var sSteps = '';
         //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
         //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
@@ -939,13 +946,15 @@ function RubikSolver() {
                 } else {
                     if ('U' == vCube[12][0] && 'U' == vCube[13][0]
                         && 'U' == vCube[14][1] && 'U' == vCube[15][2]) { // UFR(U-U) URB(U-U) UBL(B-U) ULF(F-U)向左的由字
-                        sSteps = 'ruRuruuR'; // 不用速了，用小鱼1
+                        sSteps = 'RmUrurMFRf'; // 不用速了，用小鱼1,用速，把r翻译为Rm
+                        // rUR'U'r'FR F'
                     }
                     else {
                         if ('U' == vCube[12][1] && 'U' == vCube[13][0]
                             && 'U' == vCube[14][2] && 'U' == vCube[15][0]) { // UFR(F-U) URB(U-U) UBL(L-U) ULF(U-U)半田
-                            sSteps = 'ruRuruuR';
-                        } // 不用速了，用小鱼1
+                            sSteps = 'fRmUrurMFR'; // 不用速了，用小鱼1用速，把r翻译为Rm
+                            // F' rUR'U'r'FR
+                        }
                         else {
                             sSteps = 'y';
                         }
@@ -1054,7 +1063,7 @@ function RubikSolver() {
                 } // u
                 break;
             case 0:
-                // 没有相同的角，直接做一遍公式
+                // 没有相同的角，直接做一遍公式 PLL01
                 sSteps = 'lUlululULULL';
                 break;
             case 1:
@@ -1062,9 +1071,9 @@ function RubikSolver() {
                 if (vCube[2][1] == vCube[14][1]) // 后边相同，就可以用公式了，, U(B) == U(B)L
                 {
                     if (vCube[0][1] == vCube[15][1])    //需要顺时针 需要将U(F) = U(L)F
-                        sSteps = 'lUlululULULL';
+                        sSteps = 'lUlululULULL';  //PLL 01
                     else
-                        sSteps = 'RuRURURururr';
+                        sSteps = 'RuRURURururr'; //PLL02
                 }
                 else { //不同转一下，到后边相同为止。
                     sSteps = 'y';
