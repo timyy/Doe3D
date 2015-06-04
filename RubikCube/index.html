@@ -304,6 +304,42 @@
             cube.twist(SCRAMBLE);
         }
     }
+    function btnF2LSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.CFOPF2L(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnOLLSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.CFOPOLL(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
+    function btnPLLSolver() {
+        var sCube;
+        var rs = new RubikSolver();
+        var SCRAMBLE = "";
+
+        sCube = cube.getURDLFB();
+        SCRAMBLE = rs.CFOPPLL(sCube);
+        if ("" != SCRAMBLE) {
+            cube.twistDuration = 500;
+            cube.twist(SCRAMBLE);
+        }
+    }
 </script>
 </body>
 </html>

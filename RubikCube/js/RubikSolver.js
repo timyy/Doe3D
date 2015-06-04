@@ -1084,4 +1084,130 @@ function RubikSolver() {
         }
         return sSteps;
     };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
+    this.CFOPF2L = function (sCube) {
+        // F2L：（First two Layers) 意思是同时对好前两层
+        //共有41种情况。
+        var sSteps = '';
+        //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+        //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
+        var vCube = sCube.split(" ");
+
+
+        if ('D' == vCube[16][0] && 'R' == vCube[16][1] && 'F' == vCube[16][2]) // DRF 到位, 第一层已经对好,三种情况。
+        {
+            if ('F' == vCube[1][0] && 'R' == vCube[1][1])  // (U)R == F U（R) = R
+            //case 1, 来去回回
+            {
+                sSteps = 'ufUFURur';    // U'F'UFURU'R'
+            }
+            if ('R' == vCube[0][0] && 'F' == vCube[0][1])  // (U)F == R U（F) = F
+            //case 2, 左边 来去回回
+            {
+                sSteps = 'URurufUF';    // URU'R'U'F'UF
+            }
+            if ('R' == vCube[8][0] && 'F' == vCube[8][1])  // (F)R == R F（R) = F
+            //case 3 第二层，换益
+            {
+                sSteps = 'URurufUF';    // (RU2R'U)2F'U'F
+            }
+        }
+
+        return sSteps;
+    };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
+    this.CFOPOLL = function (sCube) {
+        // OLL：(orientation of last layer).调整好最后一层的朝向
+        // 一步将顶十字和顶小鱼完成，就是做完F2L的两层后，一步打顶面对成全色。
+        // 共有57种情况。
+        var sSteps = '';
+        //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+        //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
+        var vCube = sCube.split(" ");
+
+
+        if ('D' == vCube[16][0] && 'R' == vCube[16][1] && 'F' == vCube[16][2]) // DRF 到位, 第一层已经对好,三种情况。
+        {
+            if ('F' == vCube[1][0] && 'R' == vCube[1][1])  // (U)R == F U（R) = R
+            //case 1, 来去回回
+            {
+                sSteps = 'ufUFURur';    // U'F'UFURU'R'
+            }
+            if ('R' == vCube[0][0] && 'F' == vCube[0][1])  // (U)F == R U（F) = F
+            //case 2, 左边 来去回回
+            {
+                sSteps = 'URurufUF';    // URU'R'U'F'UF
+            }
+            if ('R' == vCube[8][0] && 'F' == vCube[8][1])  // (F)R == R F（R) = F
+            //case 3 第二层，换益
+            {
+                sSteps = 'URurufUF';    // (RU2R'U)2F'U'F
+            }
+        }
+
+        return sSteps;
+    };
+    /**
+     *
+     * @param sCube
+     * @returns {string}
+     * @constructor
+     */
+    this.CFOPPLL = function (sCube) {
+        // PLL (permutation of last layer,调整好最后一层的顺序)
+        // 顶面全色后，一步将顶面的顺序调好，变成六面。即将四角移动，四边移动换为一步。
+        // 共21种。
+        var sSteps = '';
+        //  UF UR UB UL DF DR DB DL FR FL BR BL UFR URB UBL ULF DRF DFL DLB DBR 是解好的。
+        //  0  1  2  3  4  5  6  7  8  9  10 11 12  13  14  15  16  17  18  19
+        var vCube = sCube.split(" ");
+
+        var nSum = this.nUpBorderSnap(sCube);
+
+        switch (nSum) { // n有3种情况，4 就是OK了。0 就是做一下，1就是有一边相同，看顺时还是逆时，逆时小鱼1,然后小鱼2。
+            case 4:
+                // 边全部相同
+                // 如果边和面不区配就转一下。
+                if ('F' != vCube[0][1]) { // U(F)
+                    sSteps = 'u';
+                } // u
+                break;
+            case 0:
+                // 没有相同的边，有两种情况，对面换或相邻换
+                if (vCube[0][1] == vCube[2][1]) // 前面和后边相同，对面换， U(F) == U(B)
+                {
+                    sSteps = 'MMuMMuuMMuMM';  // PLL04 M2U'M2U'2M2U' M2
+                }
+                else {
+                    sSteps = 'UMuMMuMMuMUUMM'; // PLL03 U MU'M2U'M2U'MU2M2
+                }
+                break;
+            case 1:
+                // 有一边一致
+                if (vCube[2][1] == vCube[14][1]) // 后边相同，就可以用公式了，, U(B) == U(B)L
+                {
+                    if (vCube[0][1] == vCube[15][1])    //需要顺时针 需要将U(F) = U(L)F
+                        sSteps = 'lUlululULULL';  //PLL 01
+                    else
+                        sSteps = 'RuRURURururr'; //PLL02
+                }
+                else { //不同转一下，到后边相同为止。
+                    sSteps = 'y';
+                }
+                break;
+            default:
+                break;
+        }
+        return sSteps;
+    };
 }
