@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HTML5による物理シミュレーション環境の構築 〜２重振子シミュレータ〜</title>
+    <script src="http://www.natural-science.or.jp/javascript/three_r56.js"></script>
+    <script src="http://www.natural-science.or.jp/javascript/raf.js"></script>
+    <script src="http://www.natural-science.or.jp/javascript/flotr2.min.js"></script>
+    <style>
+        * {
+            font-size: small;
+        }
+
+        body {
+            margin: 0px;
+            padding: 0px 0px 0px 5px;
+            width: 900px
+        }
+
+        h1 {
+            margin: 10px 0px 10px 5px;
+            font-size: xx-large;
+        }
+
+        div#canvas-frame {
+            border: none;
+            cursor: pointer;
+            width: 500px;
+            height: 500px;
+            border: 2px solid black;
+            float: left;
+            background-color: #FFFFFF;
+        }
+
+        div#status {
+            float: left;
+            width: 370px;
+            margin: 0px 0px 0px 5px;
+            background-color: #EEEEEE;
+        }
+
+        div#restart {
+            width: 500px;
+            background-color: #EEEEEE;
+        }
+
+        div.left {
+            float: left;
+        }
+
+        input {
+            width: 25px;
+        }
+
+        div#graph {
+            float: left;
+            margin: 0px 0px 0px 5px;
+            width: 370px;
+            height: 150px;
+        }
+
+        .c {
+            clear: both;
+            line-height: 0em;
+        }
+    </style>
+    <script>
+        var g = 9.8;   //重力加速度
+        var t = 0;     //時刻
+        var dt = 0.001; //時間刻み
+        var skip = 500; //計算回数
+        var L = 200;	  //紐の長さ
+        var Poll = function (x, y, z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        };
+        var Ball = function (m, x, y, z, vx, vy, vz) {
+            this.m = m;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.vx = vx;
+            this.vy = vy;
+            this.vz = vz;
+        };
+        var Pendulum = function (poll_x, poll_y, poll_z,
+                                 ball1_m, ball1_x, ball1_y, ball1_z, ball1_vx, ball1_vy, ball1_vz,
+                                 ball2_m, ball2_x, ball2_y, ball2_z, ball2_vx, ball2_vy, ball2_vz) {
+            this.poll = new Poll(poll_x, poll_y, poll_z);
+            this.balls = new Array();
+            this.balls[0] = new Ball(ball1_m, ball1_x, ball1_y, ball1_z, ball1_vx, ball1_vy, ball1_vz);
+            this.balls[1] = new Ball(ball2_m, ball2_x, ball2_y, ball2_z, ball2_vx, ball2_vy, ball2_vz);
+            this.L01 = 0;
+            this.L12 = 0;  //ひもの長さ
+            this.cos12 = 0;
+            this.lambda1 = 0;
+            this.lambda2 = 0;
+            this.S01 = 0;
+            this.S12 = 0;   //張力
+            this.T = 0;
+            this.V = 0;
+            this.E = 0; //エネルギー
+            this.tension01_max = 1; //ひも１の最大張力
+            this.tension12_max = 1;	//ひも２の最大表力
+        }
+        var pendulum = new Pendulum(0, 0, 450,
+                1, 0, 0, 450 + L, 0, 0, 0,
+                1, 0, 0, 450 + L * 2, 0, 1.0, 0);
+        function initPendulum() {
+            for (var i = 0; i <= 1; i++) {
+                document.getElementById("im" + i).value = pendulum.balls[i].m;
+                document.getElementById("ix" + i).value = pendulum.balls[i].x;
+                document.getElementById("iy" + i).value = pendulum.balls[i].y;
+                document.getElementById("iz" + i).value = pendulum.balls[i].z;
+                document.getElementById("ivx" + i).value = pendulum.balls[i].vx;
+                document.getElementById("ivy" + i).value = pendulum.balls[i].vy;
+                document.getElementById("ivz" + i).value = pendulum.balls[i].vz;
+            }
+        }
+        var width, height;
+        var renderer;
+        function initThree() {
+            initPendulum();
+            width = document.getElementById('canvas-frame').clientWidth;
+            height = document.getElementById('canvas-frame').clientHeight;
+            try {
+                renderer = new THREE.WebGLRenderer({antialias: true});
+            } catch (e) {
+            }
+            if (!renderer) document.getElementById("errer").innerHTML = '<p style="text-align:center;font-size:small; color:red">お使いの環境ではWebGLはご利用いただけません。<br />WebGLに対応していない方のためにGIFファイルを以下に用意しました。<br /><br /><img src="http://www.natural-science.or.jp/images/20120223-4.gif" alt="WEBGLデモ" /></p>';
+            renderer.setSize(width, height);
+            document.getElementById('canvas-frame').appendChild(renderer.domElement);
+            renderer.setClearColorHex(0xFFFFFF, 1.0);
+            renderer.shadowMapEnabled = true;//影をつける（１）
+        }
+        var camera;
+        function initCamera() {
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+            camera.up.x = 0;
+            camera.up.y = 0;
+            camera.up.z = 1;
+            camera.position.set(1500, 0, 300);
+        }
+        var scene;
+        function initScene() {
+            scene = new THREE.Scene();
+        }
+        var light, light2;
+        function initLight() {
+            light = new THREE.DirectionalLight(0xFFFFFF, 1.0, 0);
+            light.position.set(20, 20, 1000);
+            light.castShadow = true;
+            scene.add(light);
+
+            light2 = new THREE.AmbientLight(0x777777);
+            scene.add(light2);
+        }
+        var plane;
+        function initObject() {
+
+            var sky = new THREE.Mesh(
+                    new THREE.SphereGeometry(5000, 20, 20),
+                    new THREE.MeshBasicMaterial({
+                        color: 0xffffff,
+                        map: THREE.ImageUtils.loadTexture("t1.png")
+                    })
+            );
+            sky.flipSided = true; //裏面を利用
+            scene.add(sky);
+            scene.fog = new THREE.FogExp2(0xffffff, 0.00002);
+
+            pendulum.poll.object = new THREE.Mesh(
+                    new THREE.CubeGeometry(20, 20, 20),
+                    new THREE.MeshLambertMaterial({color: 0xff0000, ambient: 0xFF0000})
+            );
+            scene.add(pendulum.poll.object);
+            pendulum.poll.object.castShadow = true;
+            pendulum.poll.object.position.set(pendulum.poll.x, pendulum.poll.y, pendulum.poll.z);
+
+            for (var i = 0; i <= 1; i++) {
+                pendulum.balls[i].object = new THREE.Mesh(
+                        new THREE.SphereGeometry(20, 20, 20),
+                        new THREE.MeshLambertMaterial({color: 0x999999, ambient: 0x050505})
+                );
+                scene.add(pendulum.balls[i].object);
+                pendulum.balls[i].object.castShadow = true;
+            }
+            //床の描画
+            var yuka_n = 10, yuka_w = 100;//床の個数とサイズ
+            for (var i = -yuka_n; i <= yuka_n; i++) {
+                for (var j = -yuka_n; j <= yuka_n; j++) {
+                    if ((i + j) % 2 == 0) var plane = new THREE.Mesh(
+                            new THREE.PlaneGeometry(yuka_w, yuka_w, 5, 5),
+                            new THREE.MeshLambertMaterial({color: 0x999999, ambient: 0x050505}));
+                    else var plane = new THREE.Mesh(
+                            new THREE.PlaneGeometry(yuka_w, yuka_w, 5, 5),
+                            new THREE.MeshLambertMaterial({color: 0x4d4d4d, ambient: 0x050505}));
+                    plane.position.x = j * yuka_w;
+                    plane.position.y = i * yuka_w;
+                    plane.receiveShadow = true;
+                    scene.add(plane);
+                }
+            }
+        }
+        var pause = true;
+        var d1 = [], d2 = [], file_data = [];
+        function loop() {
+            if (!pause) {
+                for (var i = 1; i <= skip; i++) pendulum.RungeKutta4();
+                t += dt * skip;
+                document.getElementById("startPauseButton").innerHTML = "ストップ";
+
+                //図を書く//////////////////////////////////////
+                d1.push([t, pendulum.S01]);
+                d2.push([t, pendulum.S12]);
+                file_data.push([t, pendulum.balls[0].z, pendulum.balls[1].z]);
+                if (d1.length > 100) {
+                    d1.shift();
+                    d2.shift();
+                }
+                //////////////////////////////////////////////
+            } else document.getElementById("startPauseButton").innerHTML = "スタート";
+            basic_legend(document.getElementById("graph"));	//図の描画
+
+            for (var i = 0; i <= 1; i++) {
+                pendulum.balls[i].object.position.set(pendulum.balls[i].x, pendulum.balls[i].y, pendulum.balls[i].z);
+            }
+            pendulum.tension();
+            pendulum.write();
+            //2点間の線を引く
+            var geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vertex(new THREE.Vector3(pendulum.poll.x, pendulum.poll.y, pendulum.poll.z)));
+            geometry.vertices.push(new THREE.Vertex(new THREE.Vector3(pendulum.balls[0].x, pendulum.balls[0].y, pendulum.balls[0].z)));
+            var r01 = parseInt(pendulum.S01 / pendulum.tension01_max * 16).toString(16);
+            r01 += r01;
+            var line1 = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: "0x" + r01 + "0000"}));
+            scene.add(line1);//シーンに追加
+
+            geometry = new THREE.Geometry();
+            geometry.vertices.push(new THREE.Vertex(new THREE.Vector3(pendulum.balls[0].x, pendulum.balls[0].y, pendulum.balls[0].z)));
+            geometry.vertices.push(new THREE.Vertex(new THREE.Vector3(pendulum.balls[1].x, pendulum.balls[1].y, pendulum.balls[1].z)));
+            var r12 = parseInt(pendulum.S12 / pendulum.tension12_max * 16).toString(16);
+            r12 += r12;
+            var line2 = new THREE.Line(geometry, new THREE.LineBasicMaterial({color: "0x" + r12 + "0000"}));
+            scene.add(line2);//シーンに追加
+
+            camera.lookAt({x: 0, y: 0, z: 300});
+            renderer.clear();
+            renderer.render(scene, camera);
+            scene.remove(line1);//シーンから削除
+            scene.remove(line2);//シーンから削除
+            window.requestAnimationFrame(loop);
+        }
+        var down = false;
+        var sy = 0, sz = 0;
+        window.onmousedown = function (ev) {  //マウスダウン
+            if (ev.target == renderer.domElement) {
+                down = true;
+                sy = ev.clientX;
+                sz = ev.clientY;
+            }
+        };
+        window.onmouseup = function () {       //マウスアップ
+            down = false;
+        };
+        window.onmousemove = function (ev) {  //マウスムーブ
+            var speed = 5;
+            if (down) {
+                if (ev.target == renderer.domElement) {
+                    var dy = -(ev.clientX - sy);
+                    var dz = -(ev.clientY - sz);
+                    camera.position.y += dy * speed;
+                    camera.position.z -= dz * speed;
+                    sy -= dy;
+                    sz -= dz;
+                }
+            }
+        }
+        window.onmousewheel = function (ev) {//マウスホイール
+            var speed = 0.5;
+            camera.position.x += ev.wheelDelta * speed;
+        }
+        function threeStart() {
+            initThree();
+            initCamera();
+            initScene();
+            initLight();
+            initObject();
+            loop();
+        }
+        function startPauseButton() {
+            if (!pause) pause = true;
+            else pause = false;
+            document.getElementById("download").innerHTML = "";
+        }
+        function resetButton() {
+            t = 0;
+            for (var i = 0; i <= 1; i++) {
+                pendulum.balls[i].m = parseFloat(document.getElementById("im" + i).value);
+                pendulum.balls[i].x = parseFloat(document.getElementById("ix" + i).value);
+                pendulum.balls[i].y = parseFloat(document.getElementById("iy" + i).value);
+                pendulum.balls[i].z = parseFloat(document.getElementById("iz" + i).value);
+                pendulum.balls[i].vx = parseFloat(document.getElementById("ivx" + i).value);
+                pendulum.balls[i].vy = parseFloat(document.getElementById("ivy" + i).value);
+                pendulum.balls[i].vz = parseFloat(document.getElementById("ivz" + i).value);
+            }
+            pendulum.tension01_max = 1;//張力の最大値
+            pendulum.tension12_max = 1;
+            d1 = [];
+            d2 = [];
+            file_data = [];
+            pause = false;
+        }
+        //////////////////////////////////////////////////////////////////////////////////
+        // 4次のルンゲクッタ
+        //////////////////////////////////////////////////////////////////////////////////
+        Pendulum.prototype.fx1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vx1;
+        }
+        Pendulum.prototype.fy1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vy1;
+        }
+        Pendulum.prototype.fz1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vz1;
+        }
+        Pendulum.prototype.fvx1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return this.lambda1 * (x1 - this.poll.x) / m1 + this.lambda2 * (x1 - x2) / m1;
+        }
+        Pendulum.prototype.fvy1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return this.lambda1 * (y1 - this.poll.y) / m1 + this.lambda2 * (y1 - y2) / m1;
+        }
+        Pendulum.prototype.fvz1 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return -g + this.lambda1 * (z1 - this.poll.z) / m1 + this.lambda2 * (z1 - z2) / m1;
+        }
+        Pendulum.prototype.fx2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vx2;
+        }
+        Pendulum.prototype.fy2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vy2;
+        }
+        Pendulum.prototype.fz2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            return vz2;
+        }
+        Pendulum.prototype.fvx2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return this.lambda2 * (x2 - x1) / m2;
+        }
+        Pendulum.prototype.fvy2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return this.lambda2 * (y2 - y1) / m2;
+        }
+        Pendulum.prototype.fvz2 = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.cul(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            return -g + this.lambda2 * (z2 - z1) / m2;
+        }
+
+        Pendulum.prototype.RungeKutta4 = function () {
+            var k1 = new Array(2);
+            var k2 = new Array(2);
+            var k3 = new Array(2);
+            var k4 = new Array(2);
+            for (var i = 0; i < 2; i++) {
+                k1[i] = new Array(6);
+                k2[i] = new Array(6);
+                k3[i] = new Array(6);
+                k4[i] = new Array(6);
+            }
+            var m1 = this.balls[0].m, x1 = this.balls[0].x, y1 = this.balls[0].y, z1 = this.balls[0].z, vx1 = this.balls[0].vx, vy1 = this.balls[0].vy, vz1 = this.balls[0].vz;
+            var m2 = this.balls[1].m, x2 = this.balls[1].x, y2 = this.balls[1].y, z2 = this.balls[1].z, vx2 = this.balls[1].vx, vy2 = this.balls[1].vy, vz2 = this.balls[1].vz;
+            //cout << Math.sqrt(Math.pow(x1-poll.x,2)+Math.pow(y1-poll.y,2)+Math.pow(z1-poll.z,2))<< " " << Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2)+Math.pow(z2-z1,2)) << endl;
+
+            k1[0][0] = dt * this.fx1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[0][1] = dt * this.fvx1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[0][2] = dt * this.fy1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[0][3] = dt * this.fvy1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[0][4] = dt * this.fz1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[0][5] = dt * this.fvz1(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][0] = dt * this.fx2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][1] = dt * this.fvx2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][2] = dt * this.fy2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][3] = dt * this.fvy2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][4] = dt * this.fz2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+            k1[1][5] = dt * this.fvz2(t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2);
+
+            k2[0][0] = dt * this.fx1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[0][1] = dt * this.fvx1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[0][2] = dt * this.fy1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[0][3] = dt * this.fvy1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[0][4] = dt * this.fz1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[0][5] = dt * this.fvz1(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][0] = dt * this.fx2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][1] = dt * this.fvx2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][2] = dt * this.fy2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][3] = dt * this.fvy2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][4] = dt * this.fz2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+            k2[1][5] = dt * this.fvz2(t + dt / 2.0, m1, x1 + k1[0][0] / 2.0, y1 + k1[0][2] / 2.0, z1 + k1[0][4] / 2.0, vx1 + k1[0][1] / 2.0, vy1 + k1[0][3] / 2.0, vz1 + k1[0][5] / 2.0, m2, x2 + k1[1][0] / 2.0, y2 + k1[1][2] / 2.0, z2 + k1[1][4] / 2.0, vx2 + k1[1][1] / 2.0, vy2 + k1[1][3] / 2.0, vz2 + k1[1][5] / 2.0);
+
+            k3[0][0] = dt * this.fx1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[0][1] = dt * this.fvx1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[0][2] = dt * this.fy1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[0][3] = dt * this.fvy1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[0][4] = dt * this.fz1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[0][5] = dt * this.fvz1(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][0] = dt * this.fx2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][1] = dt * this.fvx2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][2] = dt * this.fy2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][3] = dt * this.fvy2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][4] = dt * this.fz2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+            k3[1][5] = dt * this.fvz2(t + dt / 2.0, m1, x1 + k2[0][0] / 2.0, y1 + k2[0][2] / 2.0, z1 + k2[0][4] / 2.0, vx1 + k2[0][1] / 2.0, vy1 + k2[0][3] / 2.0, vz1 + k2[0][5] / 2.0, m2, x2 + k2[1][0] / 2.0, y2 + k2[1][2] / 2.0, z2 + k2[1][4] / 2.0, vx2 + k2[1][1] / 2.0, vy2 + k2[1][3] / 2.0, vz2 + k2[1][5] / 2.0);
+
+            k4[0][0] = dt * this.fx1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[0][1] = dt * this.fvx1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[0][2] = dt * this.fy1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[0][3] = dt * this.fvy1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[0][4] = dt * this.fz1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[0][5] = dt * this.fvz1(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][0] = dt * this.fx2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][1] = dt * this.fvx2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][2] = dt * this.fy2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][3] = dt * this.fvy2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][4] = dt * this.fz2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+            k4[1][5] = dt * this.fvz2(t + dt / 2.0, m1, x1 + k3[0][0], y1 + k3[0][2], z1 + k3[0][4], vx1 + k3[0][1], vy1 + k3[0][3], vz1 + k3[0][5], m2, x2 + k3[1][0], y2 + k3[1][2], z2 + k3[1][4], vx2 + k3[1][1], vy2 + k3[1][3], vz2 + k3[1][5]);
+
+            this.balls[0].x += (k1[0][0] + 2.0 * k2[0][0] + 2.0 * k3[0][0] + k4[0][0]) / 6.0;
+            this.balls[0].vx += (k1[0][1] + 2.0 * k2[0][1] + 2.0 * k3[0][1] + k4[0][1]) / 6.0;
+            this.balls[0].y += (k1[0][2] + 2.0 * k2[0][2] + 2.0 * k3[0][2] + k4[0][2]) / 6.0;
+            this.balls[0].vy += (k1[0][3] + 2.0 * k2[0][3] + 2.0 * k3[0][3] + k4[0][3]) / 6.0;
+            this.balls[0].z += (k1[0][4] + 2.0 * k2[0][4] + 2.0 * k3[0][4] + k4[0][4]) / 6.0;
+            this.balls[0].vz += (k1[0][5] + 2.0 * k2[0][5] + 2.0 * k3[0][5] + k4[0][5]) / 6.0;
+            this.balls[1].x += (k1[1][0] + 2.0 * k2[1][0] + 2.0 * k3[1][0] + k4[1][0]) / 6.0;
+            this.balls[1].vx += (k1[1][1] + 2.0 * k2[1][1] + 2.0 * k3[1][1] + k4[1][1]) / 6.0;
+            this.balls[1].y += (k1[1][2] + 2.0 * k2[1][2] + 2.0 * k3[1][2] + k4[1][2]) / 6.0;
+            this.balls[1].vy += (k1[1][3] + 2.0 * k2[1][3] + 2.0 * k3[1][3] + k4[1][3]) / 6.0;
+            this.balls[1].z += (k1[1][4] + 2.0 * k2[1][4] + 2.0 * k3[1][4] + k4[1][4]) / 6.0;
+            this.balls[1].vz += (k1[1][5] + 2.0 * k2[1][5] + 2.0 * k3[1][5] + k4[1][5]) / 6.0;
+        }
+        //ルンゲクッタ終わり
+        ///////////////////////////////////////////////////////////////////////
+        Pendulum.prototype.cul = function (t, m1, x1, y1, z1, vx1, vy1, vz1, m2, x2, y2, z2, vx2, vy2, vz2) {
+            this.L01 = Math.sqrt(Math.pow(x1 - this.poll.x, 2) + Math.pow(y1 - this.poll.y, 2) + Math.pow(z1 - this.poll.z, 2));
+            this.L12 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
+            var L01 = this.L01, L12 = this.L12;
+            this.cos12 = ((x1 - this.poll.x) * (x2 - x1) + (y1 - this.poll.y) * (y2 - y1) + (z1 - this.poll.z) * (z2 - z1)) / (L01 * L12);
+            var cos12 = this.cos12;
+            this.lambda1 = -m1 * (L12 * (m1 + m2) * ( (Math.pow(vx1, 2) + Math.pow(vy1, 2) + Math.pow(vz1, 2)) - g * (z1 - this.poll.z) ) + m2 * L01 * cos12 * (Math.pow(vx2 - vx1, 2) + Math.pow(vy2 - vy1, 2) + Math.pow(vz2 - vz1, 2)) ) / (Math.pow(L01, 2) * L12 * (m1 + m2 * (1.0 - Math.pow(cos12, 2))));
+            this.lambda2 = -m2 * m1 * (L12 * cos12 * ( (Math.pow(vx1, 2) + Math.pow(vy1, 2) + Math.pow(vz1, 2)) - g * (z1 - this.poll.z) ) + L01 * (Math.pow(vx2 - vx1, 2) + Math.pow(vy2 - vy1, 2) + Math.pow(vz2 - vz1, 2)) ) / (L01 * Math.pow(L12, 2) * (m1 + m2 * (1.0 - Math.pow(cos12, 2))));
+        }
+
+        Pendulum.prototype.tension = function () {
+            this.cul(t, this.balls[0].m, this.balls[0].x, this.balls[0].y, this.balls[0].z, this.balls[0].vx, this.balls[0].vy, this.balls[0].vz, this.balls[1].m, this.balls[1].x, this.balls[1].y, this.balls[1].z, this.balls[1].vx, this.balls[1].vy, this.balls[1].vz);
+            this.S01 = Math.abs(this.lambda1) * this.L01; //張力
+            this.S12 = Math.abs(this.lambda2) * this.L12;
+            if (this.tension01_max < this.S01) this.tension01_max = this.S01;
+            if (this.tension12_max < this.S12) this.tension12_max = this.S12;
+            this.T = this.balls[0].m * (Math.pow(this.balls[0].vx, 2) + Math.pow(this.balls[0].vy, 2) + Math.pow(this.balls[0].vz, 2)) / 2 + this.balls[1].m * (Math.pow(this.balls[1].vx, 2) + Math.pow(this.balls[1].vy, 2) + Math.pow(this.balls[1].vz, 2)) / 2;
+            this.V = this.balls[0].m * g * this.balls[0].z + this.balls[1].m * g * this.balls[1].z;
+            this.E = this.T + this.V;
+        }
+        Pendulum.prototype.write = function () {
+            document.getElementById("fm0").innerHTML = (this.balls[0].m).toFixed(1);
+            document.getElementById("fx0").innerHTML = (this.balls[0].x).toFixed(1);
+            document.getElementById("fy0").innerHTML = (this.balls[0].y).toFixed(1);
+            document.getElementById("fz0").innerHTML = (this.balls[0].z).toFixed(1);
+            document.getElementById("fvx0").innerHTML = (this.balls[0].vx).toFixed(1);
+            document.getElementById("fvy0").innerHTML = (this.balls[0].vy).toFixed(1);
+            document.getElementById("fvz0").innerHTML = (this.balls[0].vz).toFixed(1);
+            document.getElementById("fL01").innerHTML = (this.L01).toFixed(4);
+            document.getElementById("fS01").innerHTML = (this.S01).toFixed(2);
+            document.getElementById("fSm01").innerHTML = (this.tension01_max).toFixed(2);
+            document.getElementById("fm1").innerHTML = (this.balls[1].m).toFixed(1);
+            document.getElementById("fx1").innerHTML = (this.balls[1].x).toFixed(1);
+            document.getElementById("fy1").innerHTML = (this.balls[1].y).toFixed(1);
+            document.getElementById("fz1").innerHTML = (this.balls[1].z).toFixed(1);
+            document.getElementById("fvx1").innerHTML = (this.balls[1].vx).toFixed(1);
+            document.getElementById("fvy1").innerHTML = (this.balls[1].vy).toFixed(1);
+            document.getElementById("fvz1").innerHTML = (this.balls[1].vz).toFixed(1);
+            document.getElementById("fL12").innerHTML = (this.L12).toFixed(4);
+            document.getElementById("fS12").innerHTML = (this.S12).toFixed(2);
+            document.getElementById("fSm12").innerHTML = (this.tension12_max).toFixed(2);
+            document.getElementById("ft").innerHTML = (t).toFixed(1);
+            document.getElementById("fE").innerHTML = (this.E).toFixed(4);
+        }
+
+        function basic_legend(container) {
+            var
+                    data,
+                    graph, i;
+
+            data = [
+                {data: d1, label: 'ひも１'},
+                {data: d2, label: 'ひも２'}
+            ];
+
+            // This function prepend each label with 'y = '
+            function labelFn(label) {
+                return '張力 ' + label;
+            }
+
+            // Draw graph
+            graph = Flotr.draw(container, data, {
+                legend: {
+                    position: 'nw', // Position the legend 'south-east'.
+                    labelFormatter: labelFn, // Format the labels.
+                    backgroundColor: '#D2E8FF' // A light blue background color.
+                },
+                HtmlText: false
+            });
+        }
+        function f_write() {
+            if (!pause) startPauseButton();
+            var str = "";
+            for (var i = 0; i < file_data.length; i++) {
+                var b = file_data[i];
+                str += b[0] + " " + b[1] + " " + b[2] + "\n";
+            }
+            var blobBuilder;
+            if ("MozBlobBuilder" in window) {
+                blobBuilder = new MozBlobBuilder();
+            } else if ("WebKitBlobBuilder" in window) {
+                blobBuilder = new WebKitBlobBuilder();
+            }
+            blobBuilder.append(str);
+            var disp = document.getElementById("download");
+            if (window.URL) {
+                window.open(window.URL.createObjectURL(blobBuilder.getBlob()), "New Window", "");
+            } else if (window.webkitURL) {
+                window.open(window.webkitURL.createObjectURL(blobBuilder.getBlob()), "New Window", "");
+            }
+            disp.innerHTML = 'ファイルがダウンロードされました （t=' + t + '）';
+        }
+    </script>
+</head>
+
+<body onload="threeStart();">
+<h1>HTML5による物理シミュレーション〜２重振子シミュレータ〜</h1>
+
+<p style="font-size:small; padding:0px 0px 0px 10px; font-weight:600; color:red">
+    本シミュレータは、HTML5(canvas要素)＋WebGL(Three.jsライブラリ)を用いて、プラグインなし実行することができます。
+    ただし、クライアントサイドのブラウザとグラフィックカードが、HTML5とWebGLに対応している必要があります。
+</p>
+
+<h2>本シミュレータの特徴</h2>
+
+<p>
+    （１）直交座標系で記述した２重振子を４次のルンゲクッタを用いてJavascriptで計算しています<br/>
+    （２）計算結果をリアルタイムにcanvas要素にWebGLを用いて描画しています （canvas要素はjavascriptで動的に生成されています）<br/>
+    （３）グラフ描画ライブラリ <a href="http://humblesoftware.com/flotr2/">flotr2</a> を利用して、おもりの位置（z座標）とひもの張力をリアルタイムにグラフ描画します<br/>
+    （４）マウスドラックとマウスホイールで視点を移動することができます<br/>
+    （５）各物理量がリアルタイムに表示されます<br/>
+    （６）<span style="font-weight:600; color:red;">「スタート」ボタンを押すと、シミュレーションを開始します</span><br/>
+    （７）「ストップ」ボタンを押すと、仮想物理実験室の時間がストップします<br/>
+    （８）「リセット」ボタンを押すと、フォームで設定した初期条件にてスタートします<br/>
+    （９）「出力」ボタンを押すと、その時刻までの「時間」「張力」「z座標」のスペース区切りのデータを出力します<br/>
+    （１０）拘束と矛盾する初速度を与えると発散します　→　確かめてみてください（例えば、(vx,vy,vz)=(0,10,0)を与えると紐が伸びます）<br/>
+    【参考ページ】 <a href="http://www.natural-science.or.jp/article/20120220155529.php">HTML5による物理シミュレーション環境の構築
+    〜WebGLライブラリThree.js 入門（１／３）〜</a></p>
+<br/>
+
+<div id="errer"></div>
+<div id="canvas-frame"></div>
+<div id="graph"></div>
+
+<div id="status">
+    <h2>ステータス
+        <button onclick="startPauseButton();" id="startPauseButton">スタート</button>
+    </h2>
+    <table>
+        <tr>
+            <td>時刻[s]</td>
+            <td><span id="ft"></span></td>
+        </tr>
+        <tr>
+            <td>エネルギー[J]</td>
+            <td><span id="fE"></span></td>
+        </tr>
+    </table>
+    <div style="width: 220px; float:left">
+        <h3>おもり１</h3>
+        <table>
+            <tr>
+                <td>おもりの質量[kg]</td>
+                <td><span id="fm0"></span></td>
+            </tr>
+            <tr>
+                <td>おもりの座標[m]<br/>(x,y,z)</td>
+                <td><span id="fx0"></span> <span id="fy0"></span> <span id="fz0"></span></td>
+            </tr>
+            <tr>
+                <td>おもりの速度[m/s]<br/>(vx,vy,vz)</td>
+                <td><span id="fvx0"></span> <span id="fvy0"></span> <span id="fvz0"></span></td>
+            </tr>
+        </table>
+        <h3>おもり2</h3>
+        <table>
+            <tr>
+                <td>おもりの質量[kg]</td>
+                <td><span id="fm1"></span></td>
+            </tr>
+            <tr>
+                <td>おもりの座標[m]<br/>(x,y,z)</td>
+                <td><span id="fx1"></span> <span id="fy1"></span> <span id="fz1"></span></td>
+            </tr>
+            <tr>
+                <td>おもりの速度[m/s]<br/>(vx,vy,vz)</td>
+                <td><span id="fvx1"></span> <span id="fvy1"></span> <span id="fvz1"></span></td>
+            </tr>
+        </table>
+    </div>
+    <div style="width: 150px; float:left">
+        <h3>ひも１</h3>
+        <table>
+            <tr>
+                <td>ひもの長さ[m]</td>
+                <td><span id="fL01"></span></td>
+            </tr>
+            <tr>
+                <td>ひもの張力[N]</td>
+                <td><span id="fS01"></span></td>
+            </tr>
+            <tr>
+                <td>最大張力[N]</td>
+                <td><span id="fSm01"></span></td>
+            </tr>
+        </table>
+        <h3>ひも２</h3>
+        <table>
+            <tr>
+                <td>ひもの長さ[m]</td>
+                <td><span id="fL12"></span></td>
+            </tr>
+            <tr>
+                <td>ひもの張力[N]</td>
+                <td><span id="fS12"></span></td>
+            </tr>
+            <tr>
+                <td>最大張力[N]</td>
+                <td><span id="fSm12"></span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<br class="c">
+
+<div id="restart">
+    <h2>再設定：
+        <button onclick="resetButton();">スタート</button>
+        計算結果のの出力：
+        <button onclick="f_write();">出力</button>
+        <span id="download"></span></h2>
+
+    <div style="width: 250px; float:left">
+        <h3>おもり１</h3>
+        <table>
+            <tr>
+                <td>おもりの座標[m]</td>
+                <td>(<input type="text" id="ix0" value=""/>,<input type="text" id="iy0" value=""/>,<input type="text"
+                                                                                                          id="iz0"
+                                                                                                          value=""/> )
+                </td>
+            </tr>
+            <tr>
+                <td>おもりの速度[m/s]</td>
+                <td>(<input type="text" id="ivx0" value=""/>,<input type="text" id="ivy0" value=""/>,<input type="text"
+                                                                                                            id="ivz0"
+                                                                                                            value=""/> )
+                </td>
+            </tr>
+            <tr>
+                <td>おもりの質量[kg]</td>
+                <td><input type="text" id="im0" value=""/></td>
+            </tr>
+        </table>
+    </div>
+    <div style="width: 250px; float:left">
+        <h3>おもり２</h3>
+        <table>
+            <tr>
+                <td>おもりの座標[m]</td>
+                <td>(<input type="text" id="ix1" value=""/>,<input type="text" id="iy1" value=""/>,<input type="text"
+                                                                                                          id="iz1"
+                                                                                                          value=""/> )
+                </td>
+            </tr>
+            <tr>
+                <td>おもりの速度[m/s]</td>
+                <td>(<input type="text" id="ivx1" value=""/>,<input type="text" id="ivy1" value=""/>,<input type="text"
+                                                                                                            id="ivz1"
+                                                                                                            value=""/> )
+                </td>
+            </tr>
+            <tr>
+                <td>おもりの質量[kg]</td>
+                <td><input type="text" id="im1" value=""/></td>
+            </tr>
+        </table>
+    </div>
+    <br class="c">
+</div>
+<p>
+    （※１）系のエネルギーや棒の長さは本来一定ですが、数値誤差により少しずつずれていきます。<br/>
+    （※２）拘束に矛盾する方向への初速度を与えると正しいシミュレーションが行われません。棒の長さが変化してしまいます。
+</p>
+
+</body>
+</html>
