@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Pointクラス（点オブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 15, y: 0, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 2},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 5, y: 5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 点オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Point({
+                        draggable: true,       //マウスドラックの有無
+                        allowDrag: true,       //マウスドラックの可否
+                        radius: 0.1,            //点の半径
+                        r: {x: 0, y: 0, z: 3}, //位置ベクトル
+                        material: {
+                            color: 0xFF0000,    //発光色
+                        },
+                        //バウンディングボックス関連パラメータ
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの表示
+                        }
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Pointクラス（点オブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて点オブジェクトを生成するためのクラスです。描画時の点の半径radiusプロパティを指定することができますが、この半径は衝突演算には影響を与えません。
+    なお、Sphereクラスの派生クラスとして定義します。
+</p>
+
+<h2>点オブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var point = new PHYSICS.Point({
+	draggable : true,       //マウスドラックの有無
+	allowDrag : true,       //マウスドラックの可否
+	radius: 0.1,            //点の半径 
+	r : {x: 0, y: 0, z: 3}, //位置ベクトル
+	material : {
+		color: 0xFF0000,    //発光色
+	},
+	//バウンディングボックス関連パラメータ
+	boundingBox : {
+		visible : true,     //バウンディングボックスの表示
+	}
+})
+</pre>
+
+<h2>点オブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>radius</td>
+        <td>&lt;float&gt;</td>
+        <td>0.1</td>
+        <td>３次元グラフィクスの球の半径。衝突判定には一切影響はない。</td>
+    </tr>
+
+</table>
+
+
+<!--
+<form mt:asset-id="8597" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150116-8.png" src="http://www.natural-science.or.jp/images/20150116-8.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->
+
+</body>
+</html>
+
+

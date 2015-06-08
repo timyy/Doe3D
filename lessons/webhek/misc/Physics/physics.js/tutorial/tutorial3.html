@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsの使い方３：３次元オブジェクトの位置座標の指定とマウスドラック</title>
+    <style>
+        @import "../stylesheet/index.css";
+
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <!-- 本ライブラリ -->
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",   //額縁を表す要素のid名
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 5, y: 5, z: 5},   //カメラの位置
+                    target: {x: 0, y: 0, z: 0},     //カメラの視野中心座標
+                },
+
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+            });
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects[0] = new PHYSICS.Axis({
+
+                r: {x: 0, y: 0, z: 0},   //位置ベクトル
+
+                //マウスドラック関連
+                draggable: true,        //マウスドラックの有無
+                allowDrag: true,       //マウスドラックの可否
+
+                boundingBox: {
+                    visible: true,     //バウンディングボックスの可視化
+                    color: 0xFF0000,   //バウンディングボックスの色
+                },
+
+            });
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+    </script>
+</head>
+<body>
+<h1>physics.jsの使い３：３次元オブジェクトの位置座標の指定とマウスドラック</h1>
+
+<p>
+    文責：遠藤理平<br>
+    公開日：2015年01月23日<br>
+    最終更新日：2015年01月23日<br>
+</p>
+
+
+<p>
+    前項「<a href="tutorial2.html">physics.jsの使い方２：カメラの設定とマウス操作</a>」では、
+    仮想物理実験室オブジェクトにプロパティを指定することで、背景色の指定とマウス操作によるカメラパラメータの操作の実装を行いました。
+    本項では仮想物理実験室に登場する３次元オブジェクトの位置座標の指定と、マウスドラックによる移動の実装方法を解説します。
+</p>
+
+<h2>3-1. 実行結果</h2>
+
+<p>
+    軸オブジェクトの上にマウスポインタを置くと、軸オブジェクトのバウンディングボックスが表示されます。
+    この状態でマウスドラックすると、軸オブジェクトを平行移動することができます。
+</p>
+
+<div id="canvas-frame"></div>
+
+<p>
+    なお、軸オブジェクト上にマウスポインタがない状態でマウスドラックを行うと、
+    「<a href="tutorial2.html">physics.jsの使い方２：カメラの設定とマウス操作</a>」で解説した通りのカメラパラメーのを変更を行うことができます。
+</p>
+
+<br>
+
+<h2>3-2. ３次元オブジェクトの位置座標の指定方法</h2>
+
+<p>
+
+    仮想物理実験室に登場する３次元オブジェクトの位置座標は「rプロパティ」で指定することができます。
+    ３次元オブジェクトを生成するクラス（今回は軸オブジェクトなのでAxisクラス）のコンストラクタの引数に「rプロパティ」に
+    ３次元座標x,y,zをプロパティとするオブジェクトリテラルを与えます。
+</p>
+<pre class="brush: js;">
+// 軸オブジェクトの準備
+PHYSICS.physLab.objects[ 0 ] = new PHYSICS.Axis({
+
+	r: {x: 0, y: 0, z: 0},   //位置ベクトル
+
+})
+</pre>
+
+
+<br>
+
+<h2>3-3. ３次元オブジェクトのマウスドラックによる平行移動の実装方法</h2>
+
+<p>
+    ３次元オブジェクトのマウスドラックによる平行移動は、仮想物理実験室オブジェクトとマウスドラックを行いたい３次元オブジェクトごとに２つのプロパティ「draggableプロパティ」と「allowDragプロパティ」を設定する必要があります。この２つのプロパティの意味は次のとおりです。「draggableプロパティ」はマウスドラックによる３次元オブジェクトの平行移動を実現するために必要な各種準備を行うためのフラグであるのに対して、「allowDragプロパティ」はその時点でのマウスドラックの可否を指定するフラグとなります。そのため、マウスドラックを利用する可能性がある場合には、必ず仮想物理実験室オブジェクトと３次元オブジェクトの生成時に「draggableプロパティ」をtrueとする必要があり、その後、状況に応じて実際のマウスドラックの可否を「allowDragプロパティ」で指定するという流れになります。
+</p>
+<pre class="brush: js;">
+//仮想物理実験室オブジェクトの生成
+PHYSICS.physLab = new PHYSICS.PhysLab({
+	（省略）
+		//マウスドラック関連
+		draggable: true,   //マウスドラック利用の有無
+		allowDrag : true,  //マウスドラックの可否
+	（省略）
+});
+
+//軸オブジェクトの準備
+PHYSICS.physLab.objects[ 0 ] = new PHYSICS.Axis({
+	（省略）
+	//マウスドラック関連
+	draggable: true,        //マウスドラックの有無
+	allowDrag : true,       //マウスドラックの可否
+	（省略）
+})
+</pre>
+
+<p>
+    仮想物理実験室オブジェクトの「allowDragプロパティ」は、実験室に登場する３次元オブジェクト全体でマウスドラックによる平行移動の可否を与えます。
+    そのため、３次元オブジェクトの「allowDragプロパティ」がtrueであっても、仮想物理実験室オブジェクトのそれがfalseならば、マウスドラックは有効になりません。
+</p>
+
+
+<h2>3-4. バウンディングボックスの表示</h2>
+
+<p>
+    本実験室では、マウスドラックが有効な３次元オブジェクトをマウスポインタが指した時に、バウンディングボックスを表示することができます。
+    デフォルトでは非表示ですが、「boundingBoxプロパティ」を設定することで、バウンディングボックスの表示の有無だけでなく、色、透過の有無、透明度を指定することができます。
+</p>
+
+
+<pre class="brush: js;">
+// 軸オブジェクトの準備
+PHYSICS.physLab.objects[ 0 ] = new PHYSICS.Axis({
+	（省略）
+	boundingBox : {
+		visible : true,     //バウンディングボックスの可視化
+		color : 0xFF0000,   //バウンディングボックスの色
+	},
+	（省略）
+})
+</pre>
+
+<h3>boundingBoxプロパティで指定可能なパラメータ</h3>
+
+<table>
+    <tr>
+        <th>プロパティ名</th>
+        <th>データ型</th>
+        <th>デフォルト値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <th>
+            boundingBox
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            opacity : 0.2,<br/>
+            transparent : true,<br/>
+            draggFlag : false<br/>
+            }
+        </td>
+        <td>
+            バウンディングボックスの可視化関連パラメータ<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 発光色<br/>
+            opacity : 不透明度<br/>
+            transparent : 透過処理<br/>
+            draggFlag : マウスドラック状態かを判定するフラグ（内部）
+        </td>
+    </tr>
+</table>
+
+
+<br>
+
+
+<h2>関連ページ</h2>
+
+
+<p>
+    ■<a href="../index.html#hajimekata">「physics.jsの使い方」目次</a><br>
+    ■<a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a>
+</p>
+
+
+</body>
+</html>
+
+
+<!--
+<form mt:asset-id="8602" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150123-2.png" src="http://www.natural-science.or.jp/images/20150123-2.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->

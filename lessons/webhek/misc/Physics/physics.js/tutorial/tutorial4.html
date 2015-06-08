@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsの使い方４：様々な３次元オブジェクトの生成</title>
+    <style>
+        @import "../stylesheet/index.css";
+
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <!-- 本ライブラリ -->
+</head>
+<body>
+<h1>physics.jsの使い方４：様々な３次元オブジェクトの生成</h1>
+
+<p>
+    文責：遠藤理平<br>
+    公開日：2015年01月23日<br>
+    最終更新日：2015年01月23日<br>
+</p>
+
+
+<h2>4-1. 様々な３次元オブジェクト（リビジョン１）</h2>
+
+<p>
+    ここまで、仮想物理実験室に登場する３次元オブジェクトは軸オブジェクトだけでした。
+    本項では、リビジョン１で登場する全部で１２種類の３次元オブジェクトを紹介します。
+</p>
+
+<p style="text-align:center">
+    <a href="http://www.natural-science.or.jp/article/20150115194227.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150115-2.png" alt="床オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150115225137.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150115-3.png" alt="軸オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116122823.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-1.png" alt="ポリゴンオブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116132314.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-2.png" alt="ポリゴンオブジェクト（外部データ）"
+            style="width:140px"></a><br/>
+    <a href="http://www.natural-science.or.jp/article/20150116140626.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-3.png" alt="球オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116155520.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-4.png" alt="平面オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116161657.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-5.png" alt="立方体オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116164911.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-6.png" alt="円オブジェクト" style="width:140px"></a><br/>
+    <a href="http://www.natural-science.or.jp/article/20150116170502.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-7.png" alt="円柱オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116172532.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-8.png" alt="点オブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116225048.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-9.png" alt="ばねオブジェクト" style="width:140px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116232114.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-10.png" alt="線オブジェクト" style="width:140px"></a>
+</p>
+
+
+<h2>4-2. ３次元オブジェクトの種類と対応クラス</h2>
+
+<p>
+    仮想物理実験室に登場する３次元オブジェクトは、すべて<a href="../">PhysObjectクラス</a>を基底クラスとしたそれぞれ対応するクラスのコンストラクタで生成することができます。
+    次の表はリビジョン１で生成することのできる３次元オブジェクトの一覧が次のとおりです。なお、プロパティの与え方によって形状を変更することもできます。
+</p>
+<table>
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150115194227.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150115-2.png" alt="床オブジェクト" style="width:80px"></a></td>
+        <td>床オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150115194227.php" target="_blank">Floorクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var floor = new PHYSICS.Floor({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150115225137.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150115-3.png" alt="軸オブジェクト" style="width:80px"></a></td>
+        <td>軸オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150115225137.php" target="_blank">Axisクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var axis = new PHYSICS.Axis({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150116122823.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150116-1.png" alt="ポリゴンオブジェクト" style="width:80px"></a>
+        </td>
+        <td>ポリゴンオブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116122823.php" target="_blank">Polygonクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var polygon = new PHYSICS.Polygon({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150116132314.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150116-2.png" alt="ポリゴンオブジェクト" style="width:80px"></a>
+        </td>
+        <td>ポリゴンオブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116132314.php" target="_blank">Polygonクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var polygon = new PHYSICS.Polygon({ 
+	（省略）
+	loadJSONFilePath : "../data/Lucy100k_slim.js"
+ })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150116140626.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150116-3.png" alt="球オブジェクト" style="width:80px"></a></td>
+        <td>球オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116140626.php" target="_blank">Sphereクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var axis = new PHYSICS.Sphere({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td><a href="http://www.natural-science.or.jp/article/20150116155520.php" target="_blank"><img
+                src="http://www.natural-science.or.jp/images/20150116-4.png" alt="平面オブジェクト" style="width:80px"></a></td>
+        <td>平面オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116155520.php" target="_blank">Planeクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var plane = new PHYSICS.Plane({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116161657.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-5.png" alt="立方体オブジェクト" style="width:80px"></a>
+        </td>
+        <td>立方体オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116161657.php" target="_blank">Cubeクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var cube = new PHYSICS.Cube({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116164911.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-6.png" alt="円オブジェクト" style="width:80px"></a>
+        </td>
+        <td>円オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116164911.php" target="_blank">Circleクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var circle = new PHYSICS.Circle({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116170502.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-7.png" alt="円柱オブジェクト" style="width:80px"></td>
+        <td>円柱オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116170502.php" target="_blank">Cylinder</a></td>
+        <td>
+<pre class="brush: js;">
+var cylinder = new PHYSICS.Cylinder({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116172532.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-8.png" alt="点オブジェクト" style="width:80px"></a>
+        </td>
+        <td>点オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116172532.php" target="_blank">Pointクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var point = new PHYSICS.Point({ （省略） })
+</pre>
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116225048.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-9.png" alt="ばねオブジェクト" style="width:80px"></a>
+        </td>
+        <td>ばねオブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116225048.php" target="_blank">Springクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var spring = new PHYSICS.Spring({ （省略） })
+</pre>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="http://www.natural-science.or.jp/article/20150116232114.php" target="_blank"><img
+                    src="http://www.natural-science.or.jp/images/20150116-10.png" alt="線オブジェクト" style="width:80px"></a>
+        </td>
+        <td>線オブジェクト</td>
+        <td><a href="http://www.natural-science.or.jp/article/20150116232114.php" target="_blank">Lineクラス</a></td>
+        <td>
+<pre class="brush: js;">
+var line = new PHYSICS.Line({ （省略） })
+</pre>
+        </td>
+    </tr>
+</table>
+
+<br/>
+
+<h2>4-3. ３次元オブジェクトの生成方法</h2>
+
+<p>
+    前項までで取り扱った軸オブジェクトと同様、
+    該当クラスのコンストラクタを用いて３次元オブジェクトを生成した後に、
+    仮想物理実験室オブジェクトのobjectsプロパティ（配列）に格納します。
+    コンストラクタの引数に与えるパラメータには、生成する３次元オブジェクト固有のものも存在します。
+    詳しくは、今後順番に解説していきます。
+</p>
+
+<pre class="brush: js;">
+////////////////////////////////////////////////////////////////////
+// windowイベントの定義
+////////////////////////////////////////////////////////////////////
+window.addEventListener(&quot;load&quot;, function () {
+
+	//仮想物理実験室オブジェクトの生成
+	PHYSICS.physLab = new PHYSICS.PhysLab({
+		（省略）
+	});
+
+	////////////////////////////////////////////////////////////////////
+	//３次元オブジェクトの準備
+	////////////////////////////////////////////////////////////////////
+	//軸オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Axis({（省略）})
+	);
+	//床オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Floor({ （省略） })
+	);
+	//ポリゴンオブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Polygon({ （省略） })
+	);
+	//球オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Sphere({ （省略） })
+	);
+	//平面オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Plane({ （省略） })
+	);
+	//立方体オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Cube({ （省略） })
+	);
+	//円オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Circle({ （省略） })
+	);
+	//円柱オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Cylinder({ （省略） })
+	);
+	//点オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Point({ （省略） })
+	);
+	//ばねオブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Spring({ （省略） })
+	);
+	//線オブジェクト
+	PHYSICS.physLab.objects.push( 
+		new PHYSICS.Line({ （省略） })
+	);
+
+	//仮想物理実験室のスタートメソッドの実行
+	PHYSICS.physLab.startLab();
+});
+</pre>
+
+
+<br>
+
+
+<h2>関連ページ</h2>
+
+
+<p>
+    ■<a href="../index.html#hajimekata">「physics.jsの使い方」目次</a><br>
+    ■<a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a>
+</p>
+
+
+</body>
+</html>
+
+
+<!--
+<form mt:asset-id="8603" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150125-1.png" src="http://www.natural-science.or.jp/images/20150125-1.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->

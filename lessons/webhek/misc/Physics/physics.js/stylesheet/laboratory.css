@@ -1,0 +1,143 @@
+/*  CSSの初期化（ウェブブラウザ固有の設定を初期化するため） */
+body, h1, h2, h3, h4, h5, h6, div, p, span, img, ul, ol, li, table, tr, th, td, a {
+    font-family: "メイリオ", Meiryo, "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", sans-serif; /* フォントの指定 */
+    margin: 0px; /* マージン */
+    padding: 0px; /* パディング */
+    border: 0px; /* 枠線 */
+    line-height: 150%; /* 行の高さ */
+    font-size: small; /* フォントサイズ */
+    font-weight: normal; /* フォントウェイト */
+    color: black; /* フォントカラー */
+    background-color: transparent; /* 背景色 */
+}
+
+/* a要素の初期化 */
+a {
+    font-weight: bold; /* フォントウェイト */
+    text-decoration: underline; /* テキストデコレーション */
+}
+
+/* a要素のhover疑似クラス*/
+a:hover {
+    color: red; /* フォントカラー */
+}
+
+/* タブ切り替えインターフェースの要素 */
+div#tabs {
+    width: 800px; /* 横幅 */
+    margin: 5px auto; /* マージン：左右を「auto」（ウェブブラウザの中心に配置するため） ; */
+}
+
+/* タブ切り替えコンテンツ領域 */
+div#tabs div.inner {
+    width: 780px; /* 横幅 */
+    height: 500px; /* 縦幅 */
+    margin: 5px; /* マージン */
+    padding: 5px; /* パディング */
+    background-color: white; /* 背景色 */
+}
+
+/* キャンバスフレーム領域 */
+div#tabs div#canvas-frame, div#tabs canvas#colorMap {
+    width: 500px; /* 横幅 */
+    height: 500px; /* 縦幅 */
+    background-color: #DDDDDD; /* 背景色 */
+    float: left; /* 回り込み：左 */
+}
+
+/* コントローラー領域 */
+div#tabs div.inner div#controller {
+    width: 270px; /* 横幅 */
+    height: 490px; /* 縦幅 */
+    padding: 5px; /* パディング */
+    float: right; /* 回り込み：右 */
+    background-color: #EEEEEE; /* 背景色 */
+}
+
+/* コントローラー領域内のh2要素 */
+div#tabs div.inner div#controller h2 {
+    margin: 0px 0px 10px 0px; /* マージン */
+    padding: 2px 0px 2px 0px; /* パディング */
+    text-align: center; /* 水平方向の揃え方 */
+    font-weight: bold; /* フォントウェイト */
+    background-color: white; /* フォントウェイト背景色 */
+    border: 1px solid gray; /* 枠線の指定 */
+}
+
+/* コントローラー領域内のh3要素 */
+div#tabs div.inner div#controller h3 {
+    padding: 2px 0px 2px 5px; /* パディング */
+    font-weight: bold; /* フォントウェイト */
+}
+
+/* コントローラー領域内のtable要素 */
+div#tabs div.inner div#controller table {
+    width: 270px; /* 横幅 */
+    border-collapse: collapse; /* 枠線の折りたたみ */
+    background-color: white; /* 背景色 */
+}
+
+/* コントローラー領域内のtd要素 */
+div#tabs div.inner div#controller table td {
+    padding: 2px 5px; /* パディング */
+    border: 1px solid gray; /* 枠線の指定 */
+}
+
+/* コントローラー領域内のclass名「slider」のdiv要素 */
+div#tabs div.inner div#controller div.slider {
+    width: 185px; /* 横幅 */
+}
+
+/* コントローラー領域内のclass名「number」のinput要素 */
+div#tabs div.inner div#controller input.number {
+    width: 30px; /* 横幅 */
+}
+
+/* コントローラー領域内のボタン設置領域 */
+div#tabs div.inner div#controller div#buttonFrame {
+    margin: 5px 0px;
+    padding: 5px 5px;
+    text-align: center;
+    background-color: white;
+    border: 1px solid gray;
+}
+
+/* コントローラー領域内のボタン設置領域内のinput要素 */
+div#tabs div.inner div#controller div#buttonFrame input {
+    width: 120px;
+}
+
+div#tabs div.inner div#controller label span {
+    padding: 2px 7px;
+}
+
+/* ２次元グラフ描画用キャンバスフレーム領域 */
+div#tabs div.inner div.plotFrame {
+    width: 780px; /* 横幅 */
+    height: 500px; /* 縦幅 */
+    background-color: #FFFFFF; /* 背景色 */
+}
+
+div#toolbar {
+    text-align: left;
+    margin: 10px 0px 0px 0px;
+    padding: 5px 5px;
+}
+
+div#stats, #physLab * {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+div#tabs div.inner div.download {
+    position: relative;
+    top: -15px;
+    left: 550px;
+    font-size: xx-small;
+}
+
+div#tabs div.inner div.download a {
+    font-size: xx-small;
+}

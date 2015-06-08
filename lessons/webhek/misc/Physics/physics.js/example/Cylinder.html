@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Cylinderクラス（円柱オブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 7, y: 7, z: 10}, //カメラの位置
+                    target: {x: 0, y: 0, z: 4},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 2, y: 0, z: 20},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 円柱オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Cylinder({
+                        draggable: true,        //マウスドラックの有無
+                        allowDrag: true,        //マウスドラックの可否
+                        r: {x: 0, y: 0, z: 5.0},
+                        height: 5.0,              //円柱の長さ
+                        radiusTop: 2,            //円柱の上円の半径
+                        radiusBottom: 2,         //円柱の下円の半径
+                        openEnded: false,       //上下の円を開ける
+                        axis: {x: 0, y: 0, z: 1}, //回転軸ベクトル
+                        angle: 0,               //回転角度
+                        e: 1.0,                 //反発係数
+                        material: {
+                            color: 0x00a0e9,      //反射色
+                            ambient: 0x00a0e9,   //環境色
+                            castShadow: true,    //影の描画
+                            receiveShadow: true, //影の映り込み描画
+                        },
+                        //バウンディングボックス関連パラメータ
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの表示
+                        }
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Cylinderクラス（円柱オブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて、円柱オブジェクトを生成するためのクラスです。円柱の長さに加え、上円の半径と下円の半径をそれぞれ指定することができるので、円錐とすることもできます。
+
+<h2>円柱オブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var cylinder = new PHYSICS.Cylinder({
+	draggable : true,        //マウスドラックの有無
+	allowDrag : true,        //マウスドラックの可否
+	r: {x:0, y:0, z: 5.0}, 
+	height:5.0,              //円柱の長さ
+	radiusTop: 2,            //円柱の上円の半径
+	radiusBottom: 2,         //円柱の下円の半径
+	openEnded : false,       //上下の円を開ける
+	axis : {x: 0, y:0, z:1}, //回転軸ベクトル
+	angle : 0,               //回転角度
+	e : 1.0,                 //反発係数
+	material : {
+		color: 0x00a0e9,      //反射色
+		ambient : 0x00a0e9,   //環境色
+		castShadow : true,    //影の描画
+		receiveShadow : true, //影の映り込み描画
+	},
+	//バウンディングボックス関連パラメータ
+	boundingBox : {
+		visible : true,     //バウンディングボックスの表示
+	}			
+})
+</pre>
+
+<h2>円柱オブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>height</td>
+        <td>&lt;float&gt;</td>
+        <td>1.0</td>
+        <td>円柱の高さ</td>
+    </tr>
+    <tr>
+        <td>radiusTop</td>
+        <td>&lt;float&gt;</td>
+        <td>1.0</td>
+        <td>上円の半径</td>
+    </tr>
+    <tr>
+        <td>radiusBottom</td>
+        <td>&lt;float&gt;</td>
+        <td>1.0</td>
+        <td>下円の半径</td>
+    </tr>
+    <tr>
+        <td>openEnded</td>
+        <td>&lt;bool&gt;</td>
+        <td>false</td>
+        <td>円柱の上下の円の開閉を指定するブール値。</td>
+    </tr>
+    <tr>
+        <td>radialSegments</td>
+        <td>&lt;int&gt;</td>
+        <td>40</td>
+        <td>３次元グラフィックス時の円の分割数。大きいほど円が滑らかになる。</td>
+    </tr>
+    <tr>
+        <td>heightSegments</td>
+        <td>&lt;int&gt;</td>
+        <td>1</td>
+        <td>３次元グラフィックス時の円柱の高さ方向の分割数。</td>
+    </tr>
+
+</table>
+
+
+<!--
+<form mt:asset-id="8596" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150116-7.png" src="http://www.natural-science.or.jp/images/20150116-7.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->
+
+</body>
+</html>
+
+

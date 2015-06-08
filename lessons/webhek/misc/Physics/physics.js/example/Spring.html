@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Springクラス（ばねオブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 12, y: 0, z: 7}, //カメラの位置
+                    target: {x: 0, y: 0, z: 3},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 5, y: 5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // ばねオブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Spring({
+                        draggable: true,           //マウスドラックの有無
+                        allowDrag: true,          //マウスドラックの可否
+                        r: {x: 0, y: 0, z: 4},     //位置ベクトル
+                        collision: false,           //衝突判定の有無
+                        axis: {x: 0, y: 0, z: 1},  //姿勢軸ベクトル
+
+                        radius: 2,  //ばねの半径
+                        tube: 0.2,  //管の半径
+                        length: 5, //ばねの長さ
+                        windingNumber: 6, //巻き数
+                        radialSegments: 20, //外周の分割数
+                        tubularSegments: 10,  //管の分割数
+
+                        //材質オブジェクト関連パラメータ
+                        material: {
+                            type: "Normal",
+                            castShadow: true,    //影の描画
+                            receiveShadow: true, //影の描画
+                            shading: "Smooth",
+                        },
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの可視化
+                        },
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Springクラス（ばねオブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて、ばねオブジェクトを生成するためのクラスです。ばねの形状を決定するために必要な基本的なパラメータとして、ばねの長さ（lengthプロパティ）、ばねの半径（radiusプロパティ）、管の半径（tubeプロパティ）と巻き数（windingNumberプロパティ）を指定することができます。ばねの長さとばねの半径は、管断面の中心座標を基準としていることに注意してください。
+</p>
+
+<h2>ばねオブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var spring = new PHYSICS.Spring({
+	draggable: true,           //マウスドラックの有無
+	allowDrag : true,          //マウスドラックの可否
+	r: {x: 0, y: 0, z: 4},     //位置ベクトル
+	collision: false,           //衝突判定の有無
+	axis: {x:0, y:0, z:1},  //姿勢軸ベクトル
+
+	radius: 2,  //ばねの半径
+	tube: 0.2,  //管の半径
+	length: 5, //ばねの長さ
+	windingNumber: 6, //巻き数
+	radialSegments: 20, //外周の分割数
+	tubularSegments:10,  //管の分割数			
+
+	//材質オブジェクト関連パラメータ
+	material : {
+		type : "Normal",
+		castShadow : true,    //影の描画
+		receiveShadow : true, //影の描画
+		shading :"Smooth",
+	},
+	boundingBox : {
+		visible : true,     //バウンディングボックスの可視化
+	},
+})
+</pre>
+
+<h2>ばねオブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>radius</td>
+        <td>&lt;float&gt;</td>
+        <td>1.0</td>
+        <td>ばねの半径。</td>
+    </tr>
+    <tr>
+        <td>tube</td>
+        <td>&lt;float&gt;</td>
+        <td>0.2</td>
+        <td>管の半径</td>
+    </tr>
+    <tr>
+        <td>length</td>
+        <td>&lt;float&gt;</td>
+        <td>5</td>
+        <td>ばねの長さ。自然長</td>
+    </tr>
+    <tr>
+        <td>windingNumber</td>
+        <td>&lt;int&gt;</td>
+        <td>10</td>
+        <td> ばねの巻き数。</td>
+    </tr>
+    <tr>
+        <td>radialSegments</td>
+        <td>&lt;int&gt;</td>
+        <td>10</td>
+        <td>外周の分割数。</td>
+    </tr>
+    <tr>
+        <td>tubularSegments</td>
+        <td>&lt;int&gt;</td>
+        <td>10</td>
+        <td> 管周の分割数</td>
+    </tr>
+</table>
+
+<h2>メソッド</h2>
+<table>
+    <tr>
+        <th>メソッド名</th>
+        <th>引数</th>
+        <th>戻値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>
+            getSpringGeometry ( <br>
+            radius, <br>
+            tube, <br>
+            length, <br>
+            windingNumber,<br>
+            radialSegments, <br>
+            tubularSegments
+            <br>)
+        </td>
+        <td><br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;</td>
+        <td>&lt;Geometry&gt;</td>
+        <td>
+            引数で指定したパラメータに基づいたばねオブジェクトの形状オブジェクト（three.jsのGeometryクラス）を生成して返すメソッド。PhysObjectクラスのgetGeometryメソッド内で呼び出される。引数の意味は上記プロパティと同じ。
+        </td>
+    </tr>
+    <tr>
+        <td>updateSpringGeometry ( <br>
+            radius, <br>
+            tube, <br>
+            length,<br>
+            windingNumber,<br>
+            radialSegments,<br>
+            tubularSegments<br>
+            )
+        </td>
+        <td><br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;<br></td>
+        <td>なし</td>
+        <td>ばねオブジェクトの形状を引数で指定したパラメータに基づいて再計算を行い、３次元グラフィックスの更新を行う。引数の意味は上記プロパティと同じ。</td>
+    </tr>
+    <tr>
+        <td>setSpringGeometry (<br>
+            geometry,<br>
+            radius, <br>
+            tube, <br>
+            length,<br>
+            windingNumber,<br>
+            radialSegments,<br>
+            tubularSegments<br>
+            )
+        </td>
+        <td>
+            <br>
+            &lt;Geometry&gt;<br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;float&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;<br>
+            &lt;int&gt;<br></td>
+        <td>なし</td>
+        <td>引数で指定したパラメータに基づくばねオブジェクトの頂点座標や法線ベクトルの計算を行い、３次元グラフィックスの形状オブジェクトに格納するメソッド。</td>
+    </tr>
+    <tr>
+        <td>setSpringBottomToTop ( bottom,<br> top )</td>
+        <td>&lt;Vector3&gt;<br>
+            &lt;Vector3&gt;</td>
+        <td>なし</td>
+        <td>引数で指定したばねの下端（bottom）と上端（top）の位置ベクトルをもとに、ばねの形状の再計算と姿勢を指定するメソッド。本メソッド内部でsetSpringGeometryメソッドが実行される。</td>
+    </tr>
+</table>
+
+
+<!--
+<form mt:asset-id="8598" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150116-9.png" src="http://www.natural-science.or.jp/images/20150116-9.png" width="500" height="500" class="mt-image-none" style="" /></form>
+
+-->
+
+</body>
+</html>
+
+

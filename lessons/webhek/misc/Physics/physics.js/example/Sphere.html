@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Sphereクラス（球オブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 15, y: 0, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 2},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 5, y: 5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 球オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Sphere({
+                        //マウスドラック関連
+                        draggable: true,        //マウスドラックの有無
+                        allowDrag: true,       //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        //物理量パラメータ
+                        radius: 3,              //球の半径
+                        //初期状態パラメータ
+                        r: {x: 0, y: 0, z: 4},   //位置ベクトル
+                        //材質オブジェクト関連パラメータ
+                        material: {
+                            color: 0xFF00FF,   //反射色
+                            ambient: 0x990099, //環境色
+                            castShadow: true   //影の描画
+                        },
+                        //形状オブジェクト関連パラメータ
+                        geometry: {
+                            widthSegments: 40,
+                            heightSegments: 40
+                        },
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの可視化
+                        },
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Sphereクラス（球オブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて、球オブジェクトを生成するためのクラスです。球の半径やを指定することができます。
+</p>
+
+<h2>球オブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var sphere = new PHYSICS.Sphere({
+	//マウスドラック関連
+	draggable: true,        //マウスドラックの有無
+	allowDrag : true,       //マウスドラックの可否
+	collision: false,        //衝突判定の有無 
+	//物理量パラメータ
+	radius: 3,              //球の半径
+	//初期状態パラメータ
+	r: {x: 0, y: 0, z: 4},   //位置ベクトル
+	//材質オブジェクト関連パラメータ
+	material : {
+		color : 0xFF00FF,   //反射色
+		ambient : 0x990099, //環境色
+		castShadow : true   //影の描画
+	},
+	//形状オブジェクト関連パラメータ
+	geometry : {
+		widthSegments: 40,
+		heightSegments: 40
+	},
+	boundingBox : {
+		visible : true,     //バウンディングボックスの可視化
+	}
+})
+</pre>
+
+<h2>球オブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>radius</td>
+        <td>&lt;float&gt;</td>
+        <td>1.0</td>
+        <td>球オブジェクトの半径</td>
+    </tr>
+    <tr>
+        <td>geometry<br>
+        </td>
+        <td>&lt;object&gt;</td>
+        <td>{<br>
+            widthSegments : 20,<br>
+            heightSegments : 20,<br>
+            phiStart : 0,<br>
+            phiLength : Math.PI * 2,<br>
+            thetaStart : 0,<br>
+            thetaLength : Math.PI <br>
+            }
+        </td>
+        <td>球の形状を指定するパラメータ。<br>
+            widthSegments :y軸周りの分割数。<br>
+            heightSegments : y軸上の正の頂点から負の頂点までの分割数。<br>
+            phiStart : y軸回転の開始角度。x軸の負方向とのなす角で指定。<br>
+            phiLength : y軸回転角度（0～2*Math.PI）。<br>
+            thetaStart : x軸回転の開始角度。y軸とのなす角で指定。<br>
+            thetaLength : x軸回転角度（0～Math.PI）
+        </td>
+    </tr>
+</table>
+
+
+<!--
+	<form mt:asset-id="8592" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150116-3.png" src="http://www.natural-science.or.jp/images/20150116-3.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->
+
+</body>
+</html>
+
+

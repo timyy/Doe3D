@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</title>
+    <style>
+        @import "stylesheet/index.css";
+    </style>
+</head>
+
+<body>
+
+<h1>物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</h1>
+
+<p style="text-align:right">
+    文責：遠藤理平<br>
+    公開日：2015年01月15日<br>
+    最終更新日：2015年02月03日<br>
+</p>
+
+<h4>３次元グラフィックス</h4>
+
+<p style="text-align:center">
+    <a href="http://www.natural-science.or.jp/article/20150115163820.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150115.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150115194227.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150115-2.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150115225137.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150115-3.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116122823.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-1.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116132314.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-2.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116140626.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-3.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116155520.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-4.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116161657.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-5.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116164911.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-6.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116170502.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-7.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116172532.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-8.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116225048.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-9.png" alt="" style="width:60px"></a>
+    <a href="http://www.natural-science.or.jp/article/20150116232114.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150116-10.png" alt="" style="width:60px"></a>
+</p>
+
+<h4>仮想物理実験室</h4>
+
+<p style="text-align:center">
+    <a href="http://www.natural-science.or.jp/article/20150115163820.php" target="_blank"><img
+            src="http://www.natural-science.or.jp/images/20150203-1.png" alt="" style="width:60px"></a>
+</p>
+
+
+<h2>「physics.js」の概要</h2>
+
+<p>
+    「physics.js」は、ウェブブラウザ内に仮想物理実験室を構築し、物理シミュレーション（数値計算＋３次元グラフィックス＋２次元グラフ）を実行するためのHTML5フレームワークです。
+    と言ってもまだ剛体物理学の極々一部分のみを対象としているに過ぎませんが、今後様々な物理現象の物理シミュレーションをウェブブラウザで実行できることを目的に開発を進めて行きます。
+    本ウェブページでは「physics.js」の使い方や物理現象の解説を行い、計算アルゴリズムや物理エンジンの開発方法については、以下の書籍を参考にしてください。<br>
+    <br>
+    ・【書籍】HTML5による物理シミュレーション【剛体編２】（発売日：2015年春）<br>
+    ・<a href="http://www.natural-science.or.jp/article/20140820163117.php" target="_blank">【書籍】HTML5による物理シミュレーション【剛体編】（2014年8月24日）</a><br>
+    ・<a href="http://www.natural-science.or.jp/article/20130517211719.php" target="_blank">【書籍】HTML5による物理シミュレーション【拡散・波動編】（2013年5月25日）</a><br>
+    ・<a href="http://www.natural-science.or.jp/article/20130213224232.php" target="_blank">【書籍】HTML5による物理シミュレーション（2013年2月22日）</a><br>
+</p>
+
+
+<h3>なぜウェブブラウザ？</h3>
+
+<p>
+    　物理シミュレーション環境の構築に必要な要素として、【入力】【演算】【描画】の３つが挙げられます。これまで【入力】は各実行環境に応じたGUI、【演算】はC言語などのプログラミング言語、【描画】は二次元グラフ描写ならgnuplot、３次元グラフィックスならOpenGLというように、独立したアプリケーションをそれぞれ習得する必要がありました。<br>
+    　しかしながら、HTML5の登場により、状況は劇的に変化しつつあります。【入力】はHTMLが本来得意とするインタラクティブ・インターフェース、【演算】はウェブブラウザ上で高速実行可能なJavascript、【描画】はcanvas要素によるリアルタイムな二次元ならびに三次元のグラフィックス描画と、HTML5の各要素によって、物理シミュレーション環境の構築に必要な３つの要素すべてが高レベル、かつウェブブラウザだけで完結することが可能となりました。<br>
+    　さらにHTML5で作成したアプリケーションはウェブブラウザを介して様々な環境で実行することができる上に、当然ながら、HTMLの本領であるウェブ上での公開も容易です。すなわち、アプリケーションの共通プラットフォームであるHTML5の一つの応用例として、HTML5は、新しいインタラクティブな科学コミュニケーションツールとしての可能性を大きく秘めていると考えています。<br>
+    　物理シミュレーションは、様々な条件で何度でも、また実際の実験系では再現の難しい条件ですらパラメータ１つで「実験」することができ、さらには様々な情報（本書では軌跡や速度ベクトル、ストロボ撮影を実装）を付加することもでき、中学校・高校・大学における物理教育にも活用できると考えています。<br>
+    　プロ・アマ問わず、それぞれの方々の興味のもと物理現象の解説や発見などを発表できれば面白いなと思っています。
+</p>
+
+<h3>フレームワークとしての機能（リビジョン１）</h3>
+
+<p>
+    本フレームワーク（リビジョン１）は「【書籍】HTML5による物理シミュレーション【剛体編２】（発売日：2015年春）」にて開発を行った「physLab_r10.js」と「physObject_r10.js」を元にしていますが、書籍の内容と異なる場合がありますことをご了承下差さい。
+</p>
+
+<h4>仮想物理実験室の構築例</h4>
+
+<p style="text-align:center">
+    <a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/example/OneBodyLab.html" target="_blank">
+        <img src="http://www.natural-science.or.jp/physics.js/physics.js_r1/images/physics0001.png" alt="仮想物理実験室の構築例"
+             style="width:600px"></a>
+</p>
+
+<p>
+    実物：<a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/example/OneBodyLab.html" target="_blank">http://www.natural-science.or.jp/physics.js/physics.js_r1/example/OneBodyLab.html</a><br>
+</p>
+
+<h4>３次元グラフィックス関連</h4>
+
+<p>
+    ◯計算結果のリアルタイム描画<br>
+    ◯再生モード<br>
+    ◯運動の軌跡の表示<br>
+    ◯速度ベクトルの表示<br>
+    ◯ストロボ表示<br>
+    ◯マウスドラックによる３次元オブジェクトの移動<br>
+    ◯マウスドラックによるカメラのの移動<br>
+    ◯PNG形式画像の生成・ダウンロード<br>
+    ◯WebM形式動画の生成・ダウンロード<br>
+</p>
+
+<h4>２次元グラフ関連</h4>
+
+<p>
+    ◯任意の数値データを用いた２次元グラフ<br>
+    ◯線形・対数グラフの描画<br>
+    ◯マウス操作によるグラフの拡大<br>
+    ◯PNG形式画像の生成・ダウンロード<br>
+    ◯２次元グラフ描画を行った数値データ（CSV形式）のダウンロード<br>
+</p>
+
+
+<h4>数値計算関連</h4>
+
+<p>
+    ◯ベルレ法による時間発展の計算<br>
+    ×それ以外の計算アルゴリズムは未実装<br>
+</p>
+
+
+<h4>依存する外部ライブラリなど</h4>
+
+<p>
+    ◯ウェブブラウザ上で３次元グラフィックスを実現するHTML5の規格であるWebGLのラッパーライブラリ「<a href="http://threejs.org/"
+                                                           target="_blank">three.js</a>」（必須）<br>
+    ◯HTML要素を簡単に操ることのできるライブラリ「<a href="http://jquery.com/" target="_blank">jQuery</a>」ならびにグラフィカルなユーザインターフェースを実現する「<a
+        href="http://jqueryui.com/" target="_blank">jQueryUI</a>」（必須ではない）<br>
+    ◯HTML5のcanvas要素に２次元グラフを描画するjQueryのプラグイン「<a href="http://www.jqplot.com/" target="_blank">jqPlot</a>」（必須ではない）<br>
+    ◯FPSを表示するライブラリ「<a href="https://github.com/mrdoob/stats.js/" target="_blank">Stats.js</a>」（必須ではない）<br>
+    ◯WebM形式の動画生成ライブラリ「<a href="https://github.com/antimatter15/whammy" target="_blank">whammy.js</a>」（必須ではない）<br>
+</p>
+
+
+<h4>物理シミュレーション対象領域（リビジョン１）</h4>
+
+<p>
+    剛体物理学の極々一部。<br>
+    ◯重力場中を運動する剛体球の並進運動のみ。<br>
+    ◯剛体球と様々な３次元形状をもつ剛体（平面、立方体、球、点、線、円、円錐（円柱）ポリゴン）との衝突計算・接触計算<br>
+    ◯任意の経路上を運動する剛体球の運動<br>
+    △剛体球と運動する剛体の衝突（衝突相手の運動が関数で与えられている運動の場合のみ実装済み）<br>
+    ×それ以外の運動（回転運動すら未実装）<br>
+</p>
+
+
+<h4>「physics.js」で生成した動画の例</h4>
+
+<p style="text-align:center">
+    <iframe width="600" height="450" src="http://www.youtube.com/embed/xhi5SzzElGQ" frameborder="0"
+            allowfullscreen></iframe>
+</p>
+<p>
+    指定した任意の経路上を運動する球体のシミュレーション。本動画はサイクロイド曲線、円、楕円、２次方程式を比較した様子。
+</p>
+
+<h3>ダウンロード</h3>
+
+<p>
+    ・<a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/physics.js.zip">リビジョン１（2015年1月15日公開、最終更新日：2015年2月3日）</a>（8.5MB）<br>
+</p>
+
+
+<h3>動作環境</h3>
+
+<p>
+    HTML5が動作する最新ウェブブラウザ。ただし、一部の機能は「Google Chrome」のみで動作。<br>
+    ◎ Google Chrome 35（全機能動作）<br>
+    ◎ Opera 26（全機能動作）<br>
+    ◯ Mozilla Firefox 32（動画生成不可）<br>
+    △ Internet Explorer 11（動画生成不可・画像ダウンロード不可）<br>
+</p>
+
+<h3>ライセンス</h3>
+
+<p>
+    MIT licenseの元、変更、再配布、商用利用などによる利用を認めます。<br>
+    Copyright (c) 2015 Rihei Endo<br>
+    Released under the MIT license<br>
+    <a href="http://opensource.org/licenses/mit-license.php" target="_blank">http://opensource.org/licenses/mit-license.php</a>
+</p>
+
+<br>
+
+<h2>問い合わせ</h2>
+
+<p>
+    作者：遠藤理平<br>
+    mail：info@natural-science.or.jp
+</p>
+
+<br>
+
+
+<h2 id="hajimekata">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」の使い方</h2>
+
+<p>
+    「<a href="http://www.natural-science.or.jp/laboratory/physicsjs.php">physics.js</a>」は、ウェブブラウザ内に仮想物理実験室を構築し、物理シミュレーション（数値計算＋３次元グラフィックス＋２次元グラフ）を実行するためのHTML5フレームワークです。本項では重力場中の放物運動をテーマに、物理シミュレーションの実行方法から速度ベクトル、軌跡、ストロボの表示といったグラフィックス関連、２次元グラフ、動画生成など、「physics.js」の基本的な機能の紹介を行い、物理シミュレータ開発までの手順を示します。
+</p>
+
+<h3>目次</h3>
+
+<ul>
+    <li>１．<a href="http://www.natural-science.or.jp/article/20150121203346.php">「physics.js」のはじめかた</a>（2015.01.21公開）
+    </li>
+    <li>２．<a href="http://www.natural-science.or.jp/article/20150123151518.php">カメラの設定とマウス操作</a>（2015.01.23公開）</li>
+    <li>３．<a href="http://www.natural-science.or.jp/article/20150124084510.php">３次元オブジェクトの位置座標の指定とマウスドラック</a>（2015.01.24公開）
+    </li>
+    <li>４．<a href="http://www.natural-science.or.jp/article/20150126112740.php">様々な３次元オブジェクトの生成</a>（2015.01.26公開）</li>
+</ul>
+
+<br>
+
+<h2 id="sample">「physics.js」による仮想物理実験室の構築例</h2>
+
+<ul>
+    <li>１．<a href="http://www.natural-science.or.jp/article/20150203165807.php">等速直線運動</a>（2015.02.03公開）</li>
+</ul>
+
+
+<br>
+
+<h2>関連ページ</h2>
+
+<p>
+    ■ <a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a><br>
+    ■ <a href="physLab.html" target="_blank">PhysLabクラス</a><br>
+    ■ <a href="physObject.html" target="_blank">PhysObjectクラス</a><br>
+    <!--
+    ■ <a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/math.html" target="_blank">Mathクラス</a><br>
+    ■ <a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/plot2D.html" target="_blank">Plot2Dクラス</a><br>
+    -->
+</p>
+
+</body>
+</html>
+
+

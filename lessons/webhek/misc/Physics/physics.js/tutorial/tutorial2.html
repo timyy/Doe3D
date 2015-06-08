@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsの使い方２：カメラの設定とマウス操作</title>
+    <style>
+        @import "../stylesheet/index.css";
+
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <!-- 本ライブラリ -->
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",   //額縁を表す要素のid名
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",      //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 5, y: 5, z: 5}, //カメラの位置
+                    target: {x: 0, y: 0, z: 0.5}, //カメラの視野中心座標
+                },
+
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+
+            });
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects[0] = new PHYSICS.Axis();
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+    </script>
+</head>
+<body>
+<h1>physics.jsの使い方２：カメラの設定とマウス操作</h1>
+
+<p>
+    文責：遠藤理平<br>
+    公開日：2015年01月23日<br>
+    最終更新日：2015年01月23日<br>
+</p>
+
+
+<p>
+    前項「<a href="tutorial1.html">physics.jsの使い方１：「physics.js」のはじめかた</a>」では、ウェブブラウザ内に仮想物理実験室を構築するための最小構成について解説しました。
+    前項では真っ白の３次元空間中に軸オブジェクトが表示されただけの味気ない実装でしたが、
+    本項では背景色の指定とマウス操作によるカメラパラメータの操作を実装します。
+</p>
+
+<h2>2-1. 実行結果</h2>
+
+<div id="canvas-frame"></div>
+
+<p>
+    マウス操作によりカメラパラメータの操作が可能となります。<br>
+</p>
+
+<h3>マウス操作によるカメラパラメータの操作</h3>
+<table>
+    <tr>
+        <th>左ボタンマウスドラック</th>
+        <td>カメラの位置位置座標の移動</td>
+    </tr>
+    <tr>
+        <th>右ボタンマウスドラック</th>
+        <td>カメラの視点の中心座標の移動</td>
+    </tr>
+    <tr>
+        <th>マウススクロール</th>
+        <td>視点中心座標からカメラ位置座標までの距離を変更</td>
+    </tr>
+</table>
+
+
+<br>
+
+<h2>2-2. 背景色の指定方法</h2>
+
+<p>
+    仮想物理実験室の３次元グラフィックスの背景色は、レンダリングする際のパラメータが格納されている「rendererプロパティ」を指定します。
+    背景色はPhysLabクラスのコンストラクタの引数に「rendererプロパティ」を次のように指定します。
+</p>
+<pre class="brush: js;">
+//仮想物理実験室オブジェクトの生成
+PHYSICS.physLab = new PHYSICS.PhysLab({
+	（省略）
+	//レンダラー関連パラメータ
+	renderer : {
+		clearColor : 0xE1FCFF,       //クリアーカラー（背景色）
+	},
+	（省略）
+});
+</pre>
+
+<p>
+    「rendererプロパティ」は背景色の他、背景透明度、アンチエイリアス処理の有無、ステンシルバッファ利用の有無を指定することができます。
+    「rendererプロパティ」で指定可能なパラメータは次のとおりです。
+</p>
+
+<h3>rendererプロパティで指定可能なパラメータ</h3>
+
+<table>
+    <tr>
+        <th>プロパティ名</th>
+        <th>データ型</th>
+        <th>デフォルト値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>
+            renderer
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            clearColor : 0xFFFFFF,<br/>
+            clearAlpha : 1.0, <br/>
+            parameters : { <br/>
+            antialias: false, <br/>
+            stencil: true, <br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスのレンダラーのパラメータを指定するオブジェクト。プロパティの意味は次のとおり。<br/>
+            clearColor : クリアーカラー（背景色）<br/>
+            clearAlpha : クリアーアルファ値（背景透明度）<br/>
+            parameters : WebGLRendererクラスのコンストラクタに渡すパラメータ<br/>
+        </td>
+    </tr>
+</table>
+
+
+<br>
+
+<h2>カメラの各種パラメータの指定</h2>
+
+<p>
+    仮想物理実験室内の３次元空間を２次元平面であるディスプレイに射影するのがカメラの役割となります。
+    その射影方法を決めるのがカメラの特徴を表すパラメータで、「cameraプロパティ」に与えます。
+    本仮想物理実験室では、three.jsで指定可能な２種類のカメラ（透視投影カメラと正投影カメラ）を選択することができます。
+</p>
+<pre class="brush: js;">
+//仮想物理実験室オブジェクトの生成
+PHYSICS.physLab = new PHYSICS.PhysLab({
+	（省略）
+	//カメラ関連パラメータ
+	camera: {                        
+		type : "Perspective",      //カメラの種類 （ Perspective | Orthographic）
+		position: {x:5, y:5, z:5}, //カメラの位置
+		target: {x:0, y:0, z:0.5}, //カメラの視野中心座標
+	},
+	（省略）
+});
+</pre>
+<p>
+    なお、「cameraプロパティ」には透視投影カメラと正投影カメラで指定可能な全てのパラメータを全て指定することができます。
+    「cameraプロパティに」指定可能なパラメータは次のとおりです。
+</p>
+
+<h3>cameraプロパティで指定可能なパラメータ</h3>
+
+<table>
+    <tr>
+        <th>プロパティ名</th>
+        <th>データ型</th>
+        <th>デフォルト値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>
+            camera
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            type : "Perspective", <br/>
+            position: { x:15, y:0, z:15 },<br/>
+            up : { x:0, y:0, z:1 }, <br/>
+            target: { x:0, y:0, z:0 }, <br/>
+            fov : 45, <br/>
+            near : 0.1, <br/>
+            far : 100, <br/>
+            left : -10, <br/>
+            right: 10, <br/>
+            top: 10, <br/>
+            bottom: -10,<br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスのカメラの種類とパラメータを指定するオブジェクト。カメラとして透視投影（デフォルト）、正投影が用意されている。プロパティの意味は次のとおり。<br/>
+            type: カメラの種類（ Perspective | Orthographic）<br/>
+            position: カメラの位置座標<br/>
+            up: カメラの上ベクトル<br/>
+            target: カメラの向き中心座標<br/>
+            fov: 視野角<br/>
+            near: 視体積手前までの距離<br/>
+            far: 視体積の奥までの距離<br/>
+            left: 視体積の左までの距離（正投影）<br/>
+            right: 視体積の右までの距離（正投影）<br/>
+            top: 視体積の上までの距離（正投影）<br/>
+            bottom: 視体積の下までの距離（正投影）
+        </td>
+    </tr>
+</table>
+
+
+<br>
+
+<h2>2-3. マウス操作によるカメラ関連パラメータの操作</h2>
+
+<p>
+    PhysLabクラスのコンストラクタの引数に「trackballプロパティ」を指定することで、
+    仮想物理実験室の３次元空間中のカメラをマウスで操作することが可能となります。
+</p>
+<pre class="brush: js;">
+//仮想物理実験室オブジェクトの生成
+PHYSICS.physLab = new PHYSICS.PhysLab({
+	（省略）
+	//トラックボール関連パラメータ
+	trackball : {
+		enabled : true,   //トラックボール利用の有無
+	},
+	（省略）
+});
+</pre>
+<p>
+    なお、マウス操作によるカメラパラメータの変化量は、「trackballプロパティ」で詳細に指定することができます。
+</p>
+
+<h3>trackballプロパティで指定可能なパラメータ</h3>
+
+<table>
+    <tr>
+        <th>プロパティ名</th>
+        <th>データ型</th>
+        <th>デフォルト値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>
+            trackball
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            noRotate : false, <br/>
+            rotateSpeed : 2.0,<br/>
+            noZoom : false, <br/>
+            zoomSpeed : 1.0, <br/>
+            noPan : false, <br/>
+            panSpeed : 1.0, <br/>
+            staticMoving : true,<br/>
+            dynamicDampingFactor : 0.3,<br/>
+            }
+        </td>
+        <td>
+            enabled :トラックボール利用の有無<br/>
+            noRotate : トラックボールの回転無効化<br/>
+            rotateSpeed : トラックボールの回転速度の設定<br/>
+            noZoom : トラックボールの拡大無効化<br/>
+            zoomSpeed : トラックボールの拡大速度の設定<br/>
+            noPan : トラックボールのカメラ中心移動の無効化と中心速度の設定<br/>
+            panSpeed : 中心速度の設定<br/>
+            staticMoving : トラックボールのスタティックムーブの有効化<br/>
+            dynamicDampingFactor : トラックボールのダイナミックムーブ時の減衰定数<br/>
+
+        </td>
+    </tr>
+</table>
+
+<br>
+
+
+<h2>関連ページ</h2>
+
+
+<p>
+    ■<a href="../index.html#hajimekata">「physics.jsの使い方」目次</a><br>
+    ■<a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a>
+</p>
+
+
+</body>
+</html>
+
+
+<!--
+<form mt:asset-id="8601" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150123-1.png" src="http://www.natural-science.or.jp/images/20150123-1.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->

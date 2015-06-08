@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js PhysObjectクラス</title>
+    <style>
+        @import "stylesheet/index.css";
+
+        /* jQueryUI用CSS */
+    </style>
+</head>
+
+<body>
+<h1>PhysObjectクラス</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>を用いて、
+    仮想物理実験室に登場する全ての３次元オブジェクトの基底となるクラスです。球体や立方体といった３次元オブジェクトの描画だけでなく、ベルレ法に基づく時間発展を実装したメソッドなど、物理シミュレーションに不可欠な演算を定義します。ほとんどのプロパティとメソッドは「【書籍】HTML5による物理シミュレーション【剛体編２】（発売日：2015年春）」「<a
+        href="http://www.natural-science.or.jp/article/20130213224232.php" target="_blank">【書籍】HTML5による物理シミュレーション【剛体編】（2014年8月24日）</a>」で定義したものと同じですが、異なる場合もあります。
+</p>
+
+<h2>クラスプロパティ</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            id
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            生成する３次元オブジェクトの識別番号を与えるための番号。３次元オブジェクトが生成されるごとにインクリメントされる。生成した３次元オブジェクトの数と一致する。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h2>プロパティ</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ名
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            r
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            位置ベクトル。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            v
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            速度ベクトル。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            a
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            加速度ベクトル。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            r_1
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            ステップ数「step-1」時の位置ベクトル。ベルレ法アルゴリズムで利用。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            r_2
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            ステップ数「step-2」時の位置ベクトル。ベルレ法アルゴリズムにて衝突時に利用。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            v_1
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            ステップ数「step-1」時の速度ベクトル。ベルレ法アルゴリズムにて衝突計算に利用。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            v_2
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 ()
+        </td>
+        <td>
+            ステップ数「step-2」時の速度ベクトル。ベルレ法アルゴリズムにて衝突計算に利用。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            dynamic
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            時間発展の有無を指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            visible
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            描画の有無を指定するブール値。非表示の場合でもオブジェクトの運動並びに衝突判定を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            mass
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            1.0
+        </td>
+        <td>
+            質量。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            recordData
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            運動の記録を行うかを指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            step
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            オブジェクト内部時間ステップ数。衝突判定時に一度に数ステップ進める必要があるため、仮想物理実験室の時間ステップを表すPHYSICS.PhysLabクラスのstepプロパティとずれる場合がある。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            skipRecord
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            100
+        </td>
+        <td>
+            運動記録の間引回数。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            draggable
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            ３次元オブジェクトのマウスドラックによる移動の有無を指定するフラグ。本フラグが立つ場合、マウスドラックによる演算に必要なバウンディングボックスが生成される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            allowDrag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            ３次元オブジェクトのマウスドラックによる移動の許可を与えるフラグ。本フラグは、３次元オブジェクト生成時にdraggableプロパティがtrueと与えられている必要がある。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            rotationXYZ
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            頂点座標を指定する際に、全ての頂点座標を(x,y,z)から(z,x,y)へローテーションを行うかを指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            collision
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            衝突判定の対象とするかを指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            collisionGroups
+        </th>
+        <td>
+            [&lt;int&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            衝突計算グループを指定する配列。同じグループに所属する3次元オブジェクト同士のみが衝突計算の対象となる。本プロパティを指定されていない場合には全ての衝突計算対象の3 次元オブジェクトとの衝突計算を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            e
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            1.0
+        </td>
+        <td>
+            反発係数。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            axis
+        </th>
+        <td>
+            &lt; Vector3 &gt;
+        </td>
+        <td>
+            new THREE.Vector3 (0,0,1)
+        </td>
+        <td>
+            姿勢軸ベクトルの初期値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            angle
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            回転角の初期値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            quaternion
+        </th>
+        <td>
+            &lt; Quaternion&gt;
+        </td>
+        <td>
+            new THREE.Quaternion()
+        </td>
+        <td>
+            姿勢を表すクォータニオン。axisプロパティとangleプロパティより初期値が計算される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            material
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            type : "Lambert",<br/>
+            shading : "Flat",<br/>
+            side : "Front",<br/>
+            color : 0xFF0000,<br/>
+            ambient : 0x990000,<br/>
+            opacity : 1.0,<br/>
+            transparent : false,<br/>
+            emissive : 0x000000,<br/>
+            specular : 0x111111,<br/>
+            shininess : 30,<br/>
+            castShadow : false,<br/>
+            receiveShadow : false,<br/>
+            depthWrite : true,<br/>
+            depthTest : true,<br/>
+            textureWidth : 256,<br/>
+            textureHeight : 256,<br/>
+            blending : null,<br/>
+            bumpScale : 0.05,<br/>
+            vertexColors: false<br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックス材質関連パラメータを格納したプロパティ。<br/>
+            type : 材質の種類 （ "Basic" | "Lambert" | "Phong" | "Normal"）<br/>
+            shading : シェーディングの種類 （ "Flat" | "Smooth" ）<br/>
+            side : 描画する面 ( "Front" | "Back" | "Double")<br/>
+            color : 反射色（発光材質の場合：発光色）<br/>
+            ambient : 環境色<br/>
+            opacity : 不透明度<br/>
+            transparent : 透過処理<br/>
+            emissive : 反射材質における発光色<br/>
+            specular : 鏡面色<br/>
+            shininess : 鏡面指数<br/>
+            castShadow : 影の生成<br/>
+            receiveShadow : 影の映り込み<br/>
+            depthWrite : デプスバッファ書き込みの可否<br/>
+            depthTest : デプステスト実施の有無<br/>
+            textureWidth : 動的テクスチャ生成時の横幅<br/>
+            textureHeight : 動的テクスチャ生成時の縦幅<br/>
+            blending : ブレンディングの種類 （ "No" | "Normal" | "Additive" | "Subtractive" | "Multiply" | "Custo" ）<br/>
+            bumpScale : バンプの大きさ<br/>
+            vertexColors: 頂点色利用の有無
+        </td>
+    </tr>
+    <tr>
+        <th>
+            locus
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            maxNum : 1000,<br/>
+            }
+        </td>
+        <td>
+            軌跡の可視化関連パラメータを格納したプロパティ。<br/>
+            enabled : 可視化の有無<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 発光色<br/>
+            maxNum : 軌跡ベクトルの最大配列数
+        </td>
+    </tr>
+    <tr>
+        <th>
+            velocityVector
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            scale: 0.5,<br/>
+            }
+        </td>
+        <td>
+            速度ベクトルの可視化関連パラメータを格納したプロパティ。<br/>
+            enabled : 可視化の有無<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 発光色<br/>
+            scale : 矢印のスケール
+        </td>
+    </tr>
+    <tr>
+        <th>
+            boundingBox
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            opacity : 0.2,<br/>
+            transparent : true,<br/>
+            draggFlag : false<br/>
+            }
+        </td>
+        <td>
+            バウンディングボックスの可視化関連パラメータを格納したプロパティ。<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 発光色<br/>
+            opacity : 不透明度<br/>
+            transparent : 透過処理<br/>
+            draggFlag : マウスドラック状態かを判定するフラグ（内部）
+        </td>
+    </tr>
+    <tr>
+        <th>
+            boundingSphere
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            opacity : 0.2,<br/>
+            transparent : true,<br/>
+            widthSegments : 40,<br/>
+            heightSegments :40<br/>
+            }
+        </td>
+        <td>
+            バウンディング球の可視化関連パラメータを格納したプロパティ。<br/>
+            visible : 表示の有無<br/>
+            color : 発光色<br/>
+            opacity : 不透明度<br/>
+            transparent : 透過処理<br/>
+            widthSegments : y軸周りの分割数<br/>
+            heightSegments : y軸上の正の頂点から負の頂点までの分割数<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            strobe
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            transparent : true,<br/>
+            opacity : 0.5,<br/>
+            maxNum : 20,<br/>
+            skip : 10,<br/>
+            velocityVectorEnabled : false,<br/>
+            velocityVectorVisible : false<br/>
+            }
+        </td>
+        <td>
+            ストロボ表示の可視化関連パラメータを格納したプロパティ。<br/>
+            enabled : ストロボ撮影の有無<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 描画色<br/>
+            transparent : 透明化<br/>
+            opacity : 透明度<br/>
+            maxNum : ストロボオブジェクトの数<br/>
+            skip : ストロボの間隔<br/>
+            velocityVectorEnabled : 速度ベクトルの利用<br/>
+            velocityVectorVisible : 速度ベクトルの表示
+        </td>
+    </tr>
+    <tr>
+        <th>
+            path
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            visible : false,<br/>
+            color : null,<br/>
+            type: "LineBasic",<br/>
+            dashSize : 0.2,<br/>
+            gapSize : 0.2,<br/>
+            parametricFunction : {<br/>
+            enabled : true,<br/>
+            pointNum : 100,<br/>
+            theta : { min:0, max: 1 },<br/>
+            position : null,<br/>
+            tangent : null,<br/>
+            curvature : null,<br/>
+            getTheta : null<br/>
+            },<br/>
+            restoringForce : { <br/>
+            enabled : false,<br/>
+            k : 1.0,<br/>
+            gamma : 0.01<br/>
+            }<br/>
+            }
+        </td>
+        <td>
+            ３次元オブジェクトの運動経路を指定するのに必要となるパラメータが格納されたプロパティ。<br/>
+            enabled : 経路指定の有無<br/>
+            visible : 表示・非表示の指定<br/>
+            color : 描画色<br/>
+            type : 線の種類（ "LineBasic" || "LineDashed"）<br/>
+            dashSize : 破線の実線部分の長さ <br/>
+            gapSize : 破線の空白部分の長さ<br/>
+            parametricFunction : { //媒介変数に関するプロパティ<br/>
+            enabled : 媒介変数関数設定の有無<br/>
+            pointNum : 経路の描画点の数<br/>
+            theta : 媒介変数の範囲（ { min, max}）<br/>
+            position : 頂点座標を指定する媒介変数関数<br/>
+            tangent : 接線ベクトルを指定する媒介変数関数<br/>
+            curvature : 曲率ベクトルを指定する媒介変数関数<br/>
+            getTheta : 媒介変数の取得<br/>
+            }<br/>
+            restoringForce : { //復元力に関するプロパティ<br/>
+            enabled : 拘束状態への復元の有無<br/>
+            k : 復元力のばね定数<br/>
+            gamma : 復元力の減衰係数<br/>
+            }
+        </td>
+    </tr>
+    <tr>
+        <th>
+            beforeCreateFunctions<br/>
+            afterCreateFunctions<br/>
+            beforeUpdateFunctions<br/>
+            afterUpdateFunctions<br/>
+            beforeTimeEvolutionFunctions<br/>
+            afterTimeEvolutionFunctions<br/>
+            dynamicFunctions
+        </th>
+        <td>
+            [&lt;function&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            対応する各通信メソッド内で実行する関数を格納する配列。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h2>内部プロパティ</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ名
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            id
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            —
+        </td>
+        <td>
+            生成された仮想物理実験室オブジェクトの識別番号。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            data
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {}
+        </td>
+        <td>
+            運動の記録を格納するオブジェクト。<br/>
+            x : x座標<br/>
+            y : y座標<br/>
+            z : z座標<br/>
+            vx : 速度のx成分<br/>
+            vy : 速度のy成分<br/>
+            vz : 速度のz成分<br/>
+            kinetic : 運動エネルギー <br/>
+            potential : ポテンシャルエネルギー<br/>
+            energy : 力学的エネルギー<br/>
+            collisionHistory : 衝突履歴
+        </td>
+    </tr>
+    <tr>
+        <th>
+            geometry
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {}
+        </td>
+        <td>
+            ３次元グラフィックスの形状オブジェクト関連のオブジェクトが格納されるプロパティ。<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            CG
+        </th>
+        <td>
+            &lt;.Mesh &gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            仮想物理実験室内に描画する３次元グラフィックス。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            physLab
+        </th>
+        <td>
+            &lt;.PhysObject &gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            演算を行う仮想物理実験室。本オブジェクトの運動はここで指定した実験室のパラメータに依存する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            children
+        </th>
+        <td>
+            [&lt;PhysObject&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            子要素として格納する３次元オブジェクト。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            parent
+        </th>
+        <td>
+            &lt;.PhysObject &gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            所属する３次元オブジェクト。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            _vertices
+        </th>
+        <td>
+            [&lt;Vector3 &gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            頂点座標の初期値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            vertices
+        </th>
+        <td>
+            [&lt;Vector3 &gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            頂点座標の現在の値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            colors
+        </th>
+        <td>
+            [&lt;Color&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            頂点色。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            faces
+        </th>
+        <td>
+            [[&lt;int&gt;]]（※1）
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            面を構成する頂点番号。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            tangents
+        </th>
+        <td>
+            [&lt;Vector3 &gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            面の接線ベクトル。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            normals
+        </th>
+        <td>
+            [&lt;Vector3 &gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            面の法線ベクトル。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            collisionObjects
+        </th>
+        <td>
+            [&lt;PhysObject&gt;]（※2）
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            本オブジェクトに衝突したオブジェクトを格納する配列。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            collisionForce
+        </th>
+        <td>
+            &lt;Vector3 &gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            getCollisionForceメソッドで計算した衝突力が格納されるプロパティ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            contactForce
+        </th>
+        <td>
+            &lt;Vector3 &gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            getContactForceメソッドで計算した接触力が格納されるプロパティ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            copyPropertyList
+        </th>
+        <td>
+            [&lt;string&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            コピー対象プロパティリスト。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h2>メソッド</h2>
+
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            メソッド名
+        </th>
+        <th>
+            引数
+        </th>
+        <th>
+            戻値
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            setParameter ( parameter )
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            コンストラクタで指定した各種パラメータをオブジェクトのプロパティの値へ反映する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            resetParameter ( parameter )
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            各種パラメータの再設定を行う。それと同時に各種時系列データの初期化、ベルレ法で必要な初期値の計算も行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getProperty ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            ３次元オブジェクトの完全コピーを生成するために必要なプロパティを取得するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            clone ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            ３次元オブジェクトの完全コピーを生成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getClassName ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            ３次元オブジェクト自身のクラス名を取得するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            create3DCG ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室内で描画する３次元グラフィックスを生成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getMaterial ( material, parameter )
+        </th>
+        <td>
+            &lt;string&gt;<br/>
+            &lt;object&gt;
+        </td>
+        <td>
+            &lt;Material&gt;
+        </td>
+        <td>
+            引数で指定した材質の種類（material）と材質パラメータ（parameter）を用いて、three.jsの材質オブジェクトを生成し返。もし引数に何も与えない場合には、本メソッドを呼び出したオブジェクトに格納されている関連プロパティをそのまま適用する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            create( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            3 次元オブジェクトを生成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            update( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            3 次元オブジェクトの位置、姿勢を元に、描画する3 次元グラフィックス（CGプロパティ） の更新を行うメソッド。<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            updateLocus ( color )
+        </th>
+        <td>
+            &lt;hex&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの軌跡オブジェクトを更新するメソッド。引数でHEX形式の色が指定された場合、指定された色を優先。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            updateBoundingBox ( )
+        </th>
+        <td>
+
+        </td>
+        <td>
+
+        </td>
+        <td>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            updateVelocityVector ( color, scale )
+        </th>
+        <td>
+            &lt;hex&gt;<br/>
+            &lt;float&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの速度ベクトルオブジェクトを更新するメソッド。引数でHEX形式の色あるいはスケールが指定された場合、指定された値を優先。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeEvolution ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの時間発展を計算するメソッド。仮想物理実験室オブジェクトの同名のメソッド内で呼び出される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeTimeEvolution( dt )
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ベルレ法に基づいて引数で与えた時間発展を行うためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getForce( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            ３次元オブジェクトに加わる力を与えるメソッド。本実験室では重力＋拘束力が返される。また、オーバーライドすることで任意の力を与えることができる。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getBindingForce ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            ３次元オブジェクトの運動が指定した経路に拘束される場合、その拘束力を計算するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeInitialCondition( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ベルレ法にて計算開始するために必要な初期状態を計算するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getEnergy ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            { kinetic:&lt;float&gt;, potential: &lt;float&gt; }
+        </td>
+        <td>
+            ３次元オブジェクトの力学的エネルギーを取得するメソッド。kinetic プロパティとpotential プロパティが格納されたオブジェクトリテラルで返される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initDynamicData ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            3 次元オブジェクトの位置ベクトル・速度ベクトル・各種エネルギーの時系列データを格納する配列の初期化を行うメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            recordDynamicData ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            3 次元オブジェクトの運動に関する、位置ベクトル、速度ベクトル、各種エネルギーの時系列データを配列形式で保存するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getDynamicData ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            {<br/>
+            x:[&lt;Vector3&gt;],<br/>
+            y:[&lt;Vector3&gt;],<br/>
+            z:[&lt;Vector3&gt;],<br/>
+            vx:[&lt;Vector3&gt;],<br/>
+            vy:[&lt;Vector3&gt;],<br/>
+            vz:[&lt;Vector3&gt;],<br/>
+            kinetic:[&lt;Vector3&gt;],<br/>
+            potential:[&lt;Vector3&gt;],<br/>
+            }
+        </td>
+        <td>
+            ３次元オブジェクトの運動に関する時系列データを取得するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            beforeCreate ()<br/>
+            afterCreate ()<br/>
+            beforeUpdate ()<br/>
+            afterUpdate ()<br/>
+            beforeTimeEvolution ()<br/>
+            afterTimeEvolution ()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            —
+        </td>
+        <td>
+            仮想物理実験室内の外部との情報のやりとりを行うメソッド（通信メソッドと呼ぶ）。主要メソッド内の始めと終わりで実行され、実験室内の３次元オブジェクトの状態の把握や外界からの操作を行うために利用することができる。<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initQuaternion()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            姿勢を表すクォータニオンを計算するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            resetAttitude( axis, <br/>
+            theta )
+        </th>
+        <td>
+            &lt;Vector3&gt;<br/>
+            &lt;float&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの姿勢を引数で与えた姿勢軸ベクトル（axis）と回転角度（theta）に再設定するメソッド。内部プロパティである姿勢を表すクォータニオンquaternionプロパティの再設定を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            rotation( axis, <br/>
+            theta )
+        </th>
+        <td>
+            &lt;Vector3&gt;<br/>
+            &lt;float&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトを引数で与えた回転軸ベクトル（axis）に対して回転角度（theta）回転させるためのメソッド。内部プロパティである姿勢を表すクォータニオンquaternionプロパティを更新する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initVectors ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            平面領域が存在する３次元オブジェクトにて、法線ベクトルや接線ベクトルなどのプロパティを初期化するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeVectors ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            3 次元オブジェクトの移動や回転によって、頂点座標、法線ベクトル、接線ベクトルを更新するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionForce ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            衝突によって生じる力を計算するメソッド。戻り値として衝突力ベクトルを返す。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getContactForce ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            接触によって生じる力を計算するメソッド。戻り値として接触力ベクトルを返す。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeEvolutionOfCollision ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            衝突時の時間発展を行うメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeCenterPosition()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            faces プロパティで指定された面の中心座標を計算し、centerPosition プロパティに格納するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeFacesBoundingSphereRadius ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトに存在するポリゴン面（三角形）ごとのバウンディング球の半径を計算するメソッド。計算結果はfacesBoundingSphereRadiusプロパティに格納される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            computeCenterOfGeometry ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの中心座標を計算し、centerOfGeometryプロパティに格納するメソッド。ポリゴンオブジェクトの様に多数の面で構成される場合は各ポリゴン面の大きさを考慮、点オブジェクトや線オブジェクトのように場合には、頂点座標の単純加算平均を計算。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            setVertices ( vertices )
+        </th>
+        <td>
+            [&lt;object&gt;]
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で指定した頂点座標配列verticesを、本クラスのverticesプロパティに格納するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            setFaces ( faces )
+        </th>
+        <td>
+            [[]]
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で指定した頂点指定配列facesを、本クラスのfacesプロパティに格納するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            setColors ( colors )
+        </th>
+        <td>
+            &lt;array&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数に与えた頂点色配列を３次元オブジェクトの頂点色を格納するcolorsプロパティに与えるメソッド。指定する色の形式はHEX形式に加えRGB形式とHSL形式も可能。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            loadJSON( filePath )
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で指定したJSON形式のファイルを読み込んで、3次元オブジェクトを生成する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            setVerticesAndFacesFromGeometry ( geometry )
+        </th>
+        <td>
+            &lt;Geometry&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で指定したthree.jsの形状オブジェクト（Geometryクラス）からポリゴンオブジェクトの頂点座標と面指定配列を指定するためのメソッド。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

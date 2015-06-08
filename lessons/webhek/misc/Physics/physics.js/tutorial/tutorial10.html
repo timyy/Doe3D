@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsの使い方１：実験室オブジェクトの宣言</title>
+    <style>
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <!-- 本ライブラリ -->
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 8, y: 8, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 1},     //カメラの視野中心座標
+                },
+            });
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Axis({
+                        r: {x: 0, y: 0, z: 0},   //位置ベクトル
+                    })
+            );
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<div id="canvas-frame"></div>
+</body>
+</html>

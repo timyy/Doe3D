@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsによる仮想物理実験室：等速直線運動</title>
+    <style>
+        /* 外部スタイルシートの読み込み */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery.jqplot.css";
+        /* jqPlot用CSS */
+        @import "../stylesheet/laboratory.css";
+
+        /* 仮想物理実験室用 CSS */
+    </style>
+
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示用ライブラリ  -->
+    <script src="../javascript/whammy.js"></script>
+    <!-- 動画生成ライブラリ  -->
+
+    <script src="../javascript/jquery.jqplot_1.0.8.js"></script>
+    <!-- jqPlot用ライブラリ             -->
+    <script src="../javascript/plugins/jqplot.canvasTextRenderer.js"></script>
+    <!-- canvasテキスト描画用プラグイン -->
+    <script src="../javascript/plugins/jqplot.canvasAxisTickRenderer.js"></script>
+    <!-- canvas目盛描画用プラグイン     -->
+    <script src="../javascript/plugins/jqplot.canvasAxisLabelRenderer.js"></script>
+    <!-- canvas軸ラベル描画用プラグイン -->
+    <script src="../javascript/plugins/jqplot.logAxisRenderer.js"></script>
+    <!-- 対数グラフ描画用プラグイン     -->
+    <script src="../javascript/plugins/jqplot.highlighter.js"></script>
+    <!-- ハイライト表示用プラグイン     -->
+    <script src="../javascript/plugins/jqplot.cursor.js"></script>
+    <!-- カーソル描画用プラグイン       -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+
+                //ボタン関連
+                playButtonID: "play",           //計算開始ボタンの表す要素のid名
+                resetButtonID: "reset",         //リセットボタンの表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                locusButtonID: "locus",	     //軌跡の表示ID
+                strobeButtonID: "strobe",	     //ストロボ表示ID
+                velocityVectorButtonID: "velocityVector",	//速度ベクトルの表示ID
+
+
+                saveDataDownloadButtonID: "downloadSaveData", //保存ボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の有無
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 0,                            //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0x000000,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 10, y: -30, z: 0}, //カメラの位置
+                    target: {x: 10, y: 0, z: 0},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 0, y: -15, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: false,  //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+                timeID: "time",                  //時刻表示用要素のid名
+
+                //時間制御スライダー
+                timeslider: {
+                    enabled: true,   //利用の有無
+                    skipRecord: 25,  //時系列データの間引数
+                    domID: "timeslider",
+                },
+
+                //フラグ関連
+                locusFlag: true,                //軌跡の表示 (true | false | "pause")
+                velocityVectorFlag: "pause",    //速度ベクトルの表示 (true | false | "pause")
+                boundingBoxFlag: "dragg",       //バウンディングボックスのの表示 (true | false | "dragg")
+                strobeFlag: true,               //ストロボ撮影の有無 (true | false | "pause")
+
+                video: {
+                    enabled: true,         //ビデオ生成利用の有無
+                    makeButtonID: "video",     //動画生成ボタンID
+                    downloadButtonID: "downloadVideo", //ビデオダウンロードボタンID
+                    speed: 40,              //動画のフレームレート
+                    quality: 0.8,            //動画の画質
+                    fileName: "video.webm", //動画のファイル名
+                }
+
+            });
+
+            //着目する球オブジェクト
+            PHYSICS.physLab.balls = [];
+            //Plot2D用オブジェクト
+            PHYSICS.physLab.plot2D_position = null;  //位置ベクトル
+            PHYSICS.physLab.plot2D_velocity = null; //速度ベクトル
+            PHYSICS.physLab.plot2D_energy = null;    //エネルギー
+
+            //イベントの定義
+            PHYSICS.PhysLab.prototype.afterInitEvent = function () {
+                var scope = this;
+
+                //////////////////////////////////////////////////////
+                // ②グラフ描画オブジェクトの準備
+                //////////////////////////////////////////////////////
+                //座標グラフ描画オブジェクト
+                this.plot2D_position = new Plot2D("canvas-frame_position");
+                //オプションの設定
+                this.plot2D_position.options.axesDefaults.tickOptions.formatString = ''; //目盛フォーマット
+                this.plot2D_position.options.axes.xaxis.label = "time [s]";              //x軸ラベル
+                this.plot2D_position.options.axes.yaxis.label = "position [m]";          //y軸ラベル
+                this.plot2D_position.options.axes.yaxis.labelOptions = {angle: -90};   //ラベル回転角
+                this.plot2D_position.options.axes.xaxis.min = 0;                         //目盛の最小値
+                this.plot2D_position.options.legend.show = false;                         //凡例の有無
+                this.plot2D_position.options.legend.location = 'ne';                     //凡例の位置
+                var series = []; //データ列オプション用配列
+                series.push({
+                    showLine: true,              //線描画の有無
+                    label: "x座標",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,              //線描画の有無
+                    label: "y座標",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,              //線描画の有無
+                    label: "z座標",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                this.plot2D_position.options.series = series; //データ列オプションの代入
+
+                //速度グラフ描画
+                this.plot2D_velocity = new Plot2D("canvas-frame_velocity");
+                //オプションの設定
+                this.plot2D_velocity.options.axesDefaults.tickOptions.formatString = ''; //目盛フォーマット
+                this.plot2D_velocity.options.axes.xaxis.label = "time [s]";              //x軸ラベル
+                this.plot2D_velocity.options.axes.yaxis.label = "velocity [m/s]";         //y軸ラベル
+                this.plot2D_velocity.options.axes.yaxis.labelOptions = {angle: -90};   //ラベル回転角
+                this.plot2D_velocity.options.axes.xaxis.min = 0;                         //目盛の最小値
+                this.plot2D_velocity.options.legend.show = true;                         //凡例の有無
+                this.plot2D_velocity.options.legend.location = 'ne';                     //凡例の位置
+                var series = []; //データ列オプション用配列
+                series.push({
+                    showLine: true,           //線描画の有無
+                    label: "vx",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,            //線描画の有無
+                    label: "vy",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,           //線描画の有無
+                    label: "vz",              //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                this.plot2D_velocity.options.series = series; //データ列オプションの代入
+
+                //エネルギーグラフ描画
+                this.plot2D_energy = new Plot2D("canvas-frame_energy");
+                this.plot2D_energy.options.axesDefaults.tickOptions.formatString = '';
+                this.plot2D_energy.options.axes.xaxis.label = "time [s]";
+                this.plot2D_energy.options.axes.yaxis.label = "Energy [J]";
+                this.plot2D_energy.options.axes.yaxis.labelOptions = {angle: -90};
+                this.plot2D_energy.options.axes.xaxis.min = 0;
+                this.plot2D_energy.options.legend.show = true;      //凡例の有無
+                this.plot2D_energy.options.legend.location = 'ne';  //凡例の位置
+                var series = []; //データ列オプション用配列
+                series.push({
+                    showLine: true,              //線描画の有無
+                    label: "運動エネルギー",     //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,              //線描画の有無
+                    label: "ポテンシャルエネルギー", //凡例の設定
+                    markerOptions: {show: true} //点描画の有無
+                });
+                series.push({
+                    showLine: true,               //線描画の有無
+                    label: "力学的エネルギー",    //凡例の設定
+                    markerOptions: {show: false} //点描画の有無
+                });
+                this.plot2D_energy.options.series = series;
+
+
+                //////////////////////////////////////////////////////
+                // ③タブ切り替えインターフェースの実装
+                //////////////////////////////////////////////////////
+                //タブ切り替えインターフェースの実装
+                $('#tabs').tabs({selected: 0});
+
+                //1つ目のタブに切り替え時
+                document.getElementById("tabList").getElementsByTagName("a").item(0).addEventListener("click", function () {
+                    //表示するボタンの変更
+                    scope.switchButton();
+                });
+                //2つ目のタブに切り替え時
+                document.getElementById("tabList").getElementsByTagName("a").item(1).addEventListener("click", function () {
+                    //「pushData」メソッドによるデータ列の初期化
+                    scope.plot2D_position.clearData();
+
+                    for (var j = 0; j < scope.balls.length; j++) {
+
+                        //「pushData」メソッドによるデータの追加
+                        scope.plot2D_position.pushData(scope.balls[j].data.x);//x座標
+                    }
+
+
+                    scope.plot2D_position.linerPlot();   //メソッドによる再描画
+
+                    //PNG画像の生成
+                    var img = scope.plot2D_position.makeImage();
+                    document.getElementById("pngR").href = img.src;
+                    document.getElementById("pngR").download = "Position.png";
+
+
+                    var datas = [];
+                    for (var j = 0; j < scope.balls.length; j++) {
+                        datas.push(scope.balls[j].data.x);
+                    }
+                    //ダウンロードデータの生成
+                    scope.makeDownloadData(
+                            datas,  //データ列
+                            "downloadR",  //a要素のID
+                            "Position.txt" //ダウンロードファイル名
+                    );
+
+
+                    //一時停止フラグを設定
+                    scope.pauseFlag = true;
+                });
+
+                //id名「input_○」の要素の「value」属性に値を代入
+                document.getElementById("input_dt").value = this.dt;
+                document.getElementById("input_skip").value = this.skipRendering;
+                document.getElementById("input_skipRecord").value = this.timeslider.skipRecord;
+                document.getElementById("input_FPS").value = this.video.speed;
+                document.getElementById("input_quality").value = this.video.quality;
+
+            }
+
+            //マウスドラックイベントの定義
+            PHYSICS.PhysLab.prototype.mouseDraggEvent = function (object) {
+            }
+
+            //初期値の設定
+            PHYSICS.PhysLab.prototype.afterCheckFlags = function () {
+
+                //初期状態の場合
+                if (this.initFlag) {
+
+                    //各種計算パラメータの初期化
+                    this.dt = parseFloat(document.getElementById("input_dt").value);
+                    this.skipRendering = parseFloat(document.getElementById("input_skip").value);
+                    this.timeslider.skipRecord = parseInt(document.getElementById("input_skipRecord").value);
+                    this.video.CG.duration = 1000 / parseFloat(document.getElementById("input_FPS").value);
+                    this.video.CG.quality = parseFloat(document.getElementById("input_quality").value);
+
+
+                    for (var i = 0; i < this.objects.length; i++) {
+
+                        this.objects[i].skipRecord = this.timeslider.skipRecord;
+
+                    }
+
+                }
+
+            }
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 球オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            var colors = [0x00ff08, 0xff2af0, 0xff99ff, 0xffff66, 0x99ccff, 0xf4a460];
+            var vs = [0, 2, 4, 6, 8, 10];
+            var rs = [-10, -6, -2, 2, 6, 10];
+
+            for (var i = 0; i < vs.length; i++) {
+
+                //球オブジェクトの生成
+                PHYSICS.physLab.balls[i] = new PHYSICS.Sphere({
+                    //運動関連
+                    dynamic: true,          //運動の有無
+                    recordData: true,      //運動記録の有無
+                    skipRecord: 50,        //運動記録の間引回数
+                    collision: false,       //衝突判定の有無
+
+                    //マウスドラック関連
+                    draggable: true,       //マウスドラックの有無
+                    allowDrag: true,      //マウスドラックの可否
+
+                    //物理量パラメータ
+                    mass: 1,                //質量
+                    radius: 1,              //球の半径
+
+                    //初期状態パラメータ
+                    r: {x: 0, y: 0, z: rs[i]},  //位置ベクトル
+                    v: {x: vs[i], y: 0, z: 0}, //速度ベクトル
+
+                    //材質オブジェクト関連パラメータ
+                    material: {
+                        type: "Phong",
+                        color: colors[i],   //反射色
+                        ambient: colors[i], //環境色
+                        specular: 0x111111, //鏡面色
+                        shininess: 20,      //鏡面指数
+                    },
+                    //形状オブジェクト関連パラメータ
+                    geometry: {},
+
+                    //軌跡関連パラメータ
+                    locus: {
+                        enabled: true,     //利用の有無
+                        visible: true,     //軌跡の表示の有無
+                        color: 0xFFFFFF,  //発光色
+                        maxNum: 1000,      //軌跡ベクトルの最大配列数
+                    },
+                    //速度ベクトル関連パラメータ
+                    velocityVector: {
+                        enabled: true,     //利用の有無
+                        visible: true,     //表示の有無
+                        scale: 0.5,        //矢印のスケール
+                    },
+                    //バウンディングボックス関連パラメータ
+                    boundingBox: {
+                        visible: true,     //バウンディングボックスの表示
+                    },
+                    strobe: {
+                        enabled: true,     //ストロボ撮影の有無
+                        visible: true,     //表示・非表示の指定
+                        color: null,       //描画色
+                        transparent: true, //透明化
+                        opacity: 0.5,      //透明度
+                        maxNum: 25,           //ストロボ数
+                        skip: 20,           //ストロボの間隔
+                        velocityVectorEnabled: true, //速度ベクトルの利用
+                        velocityVectorVisible: true, //速度ベクトルの表示
+                    }
+                })
+                PHYSICS.physLab.objects.push(PHYSICS.physLab.balls[i]);
+            }
+
+
+            document.getElementById("physLab").style.display = "block";
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+
+    </script>
+</head>
+<body>
+<style>
+    #physLab {
+        display: none;
+    }
+</style>
+
+
+<div id="physLab">
+    <!-- タブ切り替えインターフェース領域 -->
+    <div id="tabs">
+
+        <!-- タブメニューリスト領域 -->
+        <ul id="tabList">
+            <li><a href="#tab1">仮想３次元空間</a></li>
+            <li><a href="#tab2">時系列プロット(x座標)</a></li>
+        </ul>
+
+        <!-- タブコンテンツ領域 -->
+        <div id="tab1" class="inner">
+            <!-- キャンバスフレーム領域-->
+
+            <div id="canvas-frame"></div>
+
+
+            <!-- コントローラー領域 -->
+            <div id="controller">
+
+                <h2>実験室パラメータ</h2>
+                <table>
+                    <tr>
+                        <td>時刻：<span id="time"></span></td>
+                        <!-- 現在のtime座標 -->
+                        <td colspan="2"><input type="range" id="timeslider" style="width:160px"></td>
+                    </tr>
+                    <tr>
+                        <!-- dt -->
+                        <td>Δt</td>
+                        <!-- 現在のdt座標 -->
+                        <td colspan="2"><input type="text" value="" id="input_dt" class="number" style="width:160px">
+                        </td>
+                    </tr>
+                    <tr>
+                        <!-- skip -->
+                        <td>描画間引</td>
+                        <!-- 現在のskip座標 -->
+                        <td><input type="text" value="" id="input_skip" class="number" style="width:160px"></td>
+                    </tr>
+                    <tr>
+                        <!-- skip -->
+                        <td>データ間引</td>
+                        <!-- 現在のskip座標 -->
+                        <td><input type="text" value="" id="input_skipRecord" class="number" style="width:160px"></td>
+                    </tr>
+
+                </table>
+                <br>
+
+                <h2>動画生成パラメータ</h2>
+                <table>
+                    <tr>
+                        <td>FPS</td>
+                        <td colspan="2"><input type="text" value="" id="input_FPS" class="number" style="width:160px">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>画質</td>
+                        <td colspan="2"><input type="text" value="" id="input_quality" class="number"
+                                               style="width:160px"></td>
+                    </tr>
+                    <tr>
+                        <td>軌跡</td>
+                        <td colspan="2">
+                            <div id="locus">
+                                <input type="radio" id="locus1" name="locus" value="true"><label for="locus1">表示</label>
+                                <input type="radio" id="locus2" name="locus" value="pause"><label
+                                    for="locus2">停止時</label>
+                                <input type="radio" id="locus3" name="locus" value="false"><label
+                                    for="locus3">非表示</label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>速度ベクトル</td>
+                        <td colspan="2">
+                            <div id="velocityVector">
+                                <input type="radio" id="velocityVector1" name="velocityVector" value="true"><label
+                                    for="velocityVector1">表示</label>
+                                <input type="radio" id="velocityVector2" name="velocityVector" value="pause"><label
+                                    for="velocityVector2">停止時</label>
+                                <input type="radio" id="velocityVector3" name="velocityVector" value="false"><label
+                                    for="velocityVector3">非表示</label>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ストロボ</td>
+                        <td colspan="2">
+                            <div id="strobe">
+                                <input type="radio" id="strobe1" name="strobe" value="true"><label
+                                    for="strobe1">表示</label>
+                                <input type="radio" id="strobe2" name="strobe" value="pause"><label
+                                    for="strobe2">停止時</label>
+                                <input type="radio" id="strobe3" name="strobe" value="false"><label
+                                    for="strobe3">非表示</label>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- ボタン -->
+                <div id="toolbar" class="ui-widget-header ui-corner-all">
+                    <button id="play" style="width:110px"></button>
+                    <button id="reset"></button>
+                    <a href="" id="downloadSaveData"></a>
+                    <a href="" id="picture"></a>
+                    <button id="video"></button>
+                    <a href="" id="downloadVideo"></a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- タブコンテンツ領域 -->
+        <div id="tab2" class="inner">
+            <!-- キャンバスフレーム領域-->
+            <div id="canvas-frame_position" class="plotFrame"></div>
+            <div class="download">ダウンロード：<a id="pngR">画像（PNG）</a>｜<a id="downloadR">数値データ(TXT)</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

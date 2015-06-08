@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Axisクラス（軸オブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 8, y: 8, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 0},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 0, y: -5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Axis({
+                        draggable: true,       //マウスドラックの有無
+                        allowDrag: true,      //マウスドラックの可否
+                        r: {x: 0, y: 0, z: 1},   //位置ベクトル
+                        size: {length: 3, headLength: 1, headWidth: 0.5},  //矢印のサイズ（矢印の長さ、矢印頭の長さ、矢印頭の幅）
+                        axisColors: [0xFF0000, 0x00FF00, 0x0000FF],     //軸の色
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの可視化
+                            color: 0xFFFFFF,   //バウンディングボックスの色
+                        },
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Axisクラス（軸オブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて、３次元の軸オブジェクトを生成するためのクラスです。本実験室では通常z軸を上方向とします。各軸の色や矢印の長さや大きさを指定することができます。
+</p>
+
+<h2>軸オブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var floor = new PHYSICS.Axis({
+	draggable: true,       //マウスドラックの有無
+	allowDrag : true,      //マウスドラックの可否
+	r :{ x: 0, y: 0, z: 1},   //位置ベクトル
+	size : {length:3, headLength:1, headWidth:0.5},  //矢印のサイズ（矢印の長さ、矢印頭の長さ、矢印頭の幅）
+	axisColors : [0xFF0000, 0x00FF00, 0x0000FF],     //軸の色
+	boundingBox : {
+		visible : true,     //バウンディングボックスの可視化
+		color : 0xFFFFFF,   //バウンディングボックスの色
+	},
+})
+</pre>
+
+<h2>軸オブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>size</td>
+        <td>&lt;object&gt;</td>
+        <td>{length:3, headLength:1, headWidth:0.5}</td>
+        <td>軸オブジェクトを構成する矢印オブジェクトのサイズ。各プロパティlengthは矢印の全長、headLengthは矢印頭の長さ、headWidthは矢印頭の幅を表す。</td>
+    </tr>
+    <tr>
+        <td>axisColors</td>
+        <td>[&lt;hex&gt;]</td>
+        <td>[0xFF0000, 0x00FF00, 0x0000FF]</td>
+        <td>軸オブジェクトを構成する矢印オブジェクトの色を指定する配列。x軸（赤）、y軸（緑）、z軸（青）の順番で格納する（カッコの中は色）。</td>
+    </tr>
+</table>
+
+<!--
+<form mt:asset-id="8589" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150115-3.png" src="http://www.natural-science.or.jp/images/20150115-3.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->
+
+</body>
+</html>
+
+

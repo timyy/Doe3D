@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsのデモ：経路が指定された球オブジェクト</title>
+    <style>
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+    <script src="../javascript/whammy.js"></script>
+    <!-- 動画生成ライブラリ  -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+
+                //ボタン関連
+                playButtonID: "play",           //計算開始ボタンの表す要素のid名
+                resetButtonID: "reset",         //リセットボタンの表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                saveDataDownloadButtonID: "downloadSaveData", //保存ボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 0, y: -20, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 5},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 0, y: -5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+                //フラグ関連
+                locusFlag: true,                //軌跡の表示 (true | false | "pause")
+                velocityVectorFlag: "pause",    //速度ベクトルの表示 (true | false | "pause")
+                boundingBoxFlag: "dragg",       //バウンディングボックスのの表示 (true | false | "dragg")
+
+                timeID: "time",                  //時刻表示用要素のid名
+
+                //時間制御スライダー
+                timeslider: {
+                    enabled: true,   //利用の有無
+                    skipRecord: 50,  //時系列データの間引数
+                    domID: "timeslider",
+                },
+
+                video: {
+                    enabled: true,          //ビデオ生成利用の有無
+                    makeButtonID: "video",  //動画生成ボタンID
+                    downloadButtonID: "downloadVideo", //ビデオダウンロードボタンID
+                    speed: 40,              //動画のフレームレート
+                    quality: 0.8,            //動画の画質
+                    fileName: "video.webm", //動画のファイル名
+                    frames: {
+                        enabled: true,
+
+
+                    }
+                }
+            });
+
+            var L = 6;
+            var omega0 = Math.sqrt(PHYSICS.physLab.g / L);
+
+            ////////////////////////////////////////////////////////////////////
+            // 球オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.ball = new PHYSICS.Sphere({
+                //運動関連
+                dynamic: true,          //運動の有無
+                recordData: true,      //運動記録の有無
+                skipRecord: 50,        //運動記録の間引回数
+
+                //マウスドラック関連
+                draggable: true,        //マウスドラックの有無
+                allowDrag: true,       //マウスドラックの可否
+
+                collision: false,        //衝突判定の有無
+
+                //物理量パラメータ
+                mass: 1,                //質量
+                radius: 1,              //球の半径
+
+                //初期状態パラメータ
+                r: {x: 0, y: 0, z: 0},   //位置ベクトル
+                v: {x: 0, y: 0, z: 0},   //速度ベクトル
+
+                //材質オブジェクト関連パラメータ
+                material: {
+                    color: 0xFF0000,   //反射色
+                    ambient: 0x990000, //環境色
+                    castShadow: true   //影の描画
+                },
+                //形状オブジェクト関連パラメータ
+                geometry: {
+                    widthSegments: 40,
+                    heightSegments: 40
+                },
+                path: {
+                    enabled: true,
+                    visible: true,    //表示・非表示の指定
+                    color: 0x0000FF,
+                    type: "LineDashed",  //線の種類（ "LineBasic" || "LineDashed"）
+                    dashSize: 0.2,     //破線の実線部分の長さ
+                    gapSize: 0.2,      //破線の空白部分の長さ
+                    restoringForce: {   //復元力関連プロパティ
+                        enabled: true,  //拘束状態への復元の有無
+                        k: 1.0,         //復元力のばね定数
+                        gamma: 0.000689  //復元力の減衰係数
+                    },
+                    parametricFunction: {     //媒介変数関数
+                        enabled: true,
+                        pointNum: 100,
+                        theta: {min: 0, max: 2 * Math.PI},
+                        R: 6,
+                        R_exact: 6,
+                        center: {x: 0, y: 0, z: 6},
+                        position: function (_this, theta) { //頂点座標を指定する媒介変数関数
+                            var x = _this.R_exact * Math.cos(theta);
+                            var y = 0;
+                            var z = _this.R_exact * Math.sin(theta) + _this.center.z;
+                            return {x: x, y: y, z: z};
+                        },
+                        tangent: function (_this, theta) {  //接線ベクトルを指定する媒介変数関数
+                            var x = -Math.sin(theta);
+                            var y = 0;
+                            var z = Math.cos(theta);
+                            return {x: x, y: y, z: z};
+                        },
+                        curvature: function (_this, theta) { //曲率ベクトルを指定する媒介変数関数
+                            var x = -Math.cos(theta) / _this.R;
+                            var y = 0;
+                            var z = -Math.sin(theta) / _this.R;
+                            return {x: x, y: y, z: z};
+                        },
+                        getTheta: function (_this, object) { //媒介変数の取得
+
+                            //円形経路の中心座標
+                            var center = new THREE.Vector3().addVectors(_this.center, object.path.line.r);
+
+                            //相対位置ベクトル
+                            var bar_r = new THREE.Vector3().subVectors(object.r, center);
+                            var R = _this.R = bar_r.length();
+                            var sinTheta = bar_r.z / R;
+
+                            var theta;
+                            if (sinTheta > 0) {
+                                theta = Math.acos(bar_r.x / R);
+                            } else {
+                                theta = 2 * Math.PI - Math.acos(bar_r.x / R);
+                            }
+                            return theta;
+                        }
+
+                    },
+                    dynamicFunction: function (time) {
+                        //実験室の時刻
+                        time = ( time !== undefined ) ? time : this.physLab.dt * this.physLab.step;
+
+                        //円運動の定義
+                        var L = this.parametricFunction.L || 1.0;
+                        var omega = this.parametricFunction.omega || Math.sqrt(this.physLab.g / 6);
+
+                        //位置ベクトル
+                        this.r.x = L * Math.sin(omega * time);
+                        this.r.z = L * ( 1 - Math.cos(omega * time) );
+                        //速度ベクトル
+                        this.v.x = L * omega * Math.cos(omega * time);
+                        this.v.z = L * omega * Math.sin(omega * time);
+                        //加速度ベクトル
+                        this.a.x = -L * omega * omega * Math.sin(omega * time);
+                        this.a.z = L * omega * omega * Math.cos(omega * time);
+
+                    }
+
+                },
+                //軌跡関連パラメータ
+                locus: {
+                    enabled: false,     //利用の有無
+                    visible: true,     //軌跡の表示の有無
+                    color: 0xFF00FF,  //発光色
+                    maxNum: 1000,      //軌跡ベクトルの最大配列数
+                },
+                //速度ベクトル関連パラメータ
+                velocityVector: {
+                    enabled: true,     //利用の有無
+                    visible: true,     //表示の有無
+                    color: 0xFF00FF,   //発光色
+                    scale: 0.5,        //矢印のスケール
+                },
+                //バウンディングボックス関連パラメータ
+                boundingBox: {
+                    visible: true,     //バウンディングボックスの表示
+                },
+                //ストロボ撮影関連パラメータ
+                strobe: {
+                    enabled: false,     //ストロボ撮影の有無
+                    visible: true,     //表示・非表示の指定
+                    color: null,       //描画色
+                    transparent: true, //透明化
+                    opacity: 0.5,      //透明度
+                    maxNum: 50,           //ストロボ数
+                    skip: 10,           //ストロボの間隔
+                    velocityVectorEnabled: true, //速度ベクトルの利用
+                    velocityVectorVisible: true, //速度ベクトルの表示
+                }
+            });
+
+            //球オブジェクトの生成
+            PHYSICS.physLab.objects.push(PHYSICS.physLab.ball);
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: -1},
+                        boundingBox: {
+                            visible: true,     //バウンディングボックスの可視化
+                            color: 0xFF0000,   //バウンディングボックスの色
+                        },
+                        material: {
+                            type: "Lambert",      //材質の種類
+                            receiveShadow: true,  //影の描画
+                        }
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Axis({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: true,      //マウスドラックの可否
+                        r: {x: -9, y: 9, z: 0},   //位置ベクトル
+                    })
+            );
+
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<div id="canvas-frame"></div>
+<table>
+    <tr>
+        <td>時刻</td>
+        <td><span id="time"></span></td>
+        <td><input type="range" id="timeslider" style="width:200px"></td>
+    </tr>
+</table>
+
+<div id="toolbar" class="ui-widget-header ui-corner-all">
+    <button id="play"></button>
+    <button id="reset"></button>
+    <a href="" id="downloadSaveData"></a>
+    <a href="" id="picture"></a>
+    <button id="video"></button>
+    <a href="" id="downloadVideo"></a>
+</div>
+
+</body>
+</html>

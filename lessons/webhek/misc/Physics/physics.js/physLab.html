@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js PhysLabクラス</title>
+    <style>
+        @import "stylesheet/index.css";
+
+        /* jQueryUI用CSS */
+    </style>
+</head>
+
+<body>
+<h1>PhysLabクラス（リビジョン１）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>を用いて、
+    ウェブブラウザ内に仮想物理実験室を生成するクラスです。本クラスを利用して生成したオブジェクトは「仮想物理実験室オブジェクト」と呼びます。ほとんどのプロパティとメソッドは
+    「【書籍】HTML5による物理シミュレーション【剛体編２】（発売日：2015年春）」「<a href="http://www.natural-science.or.jp/article/20130213224232.php"
+                                                  target="_blank">【書籍】HTML5による物理シミュレーション【剛体編】（2014年8月24日）</a>」で定義したものと同じですが、異なる場合もあります。
+</p>
+
+
+<h2>クラスプロパティ</h2>
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            id
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            生成する仮想物理実験室オブジェクトの識別番号を与えるための番号。実験室オブジェクトが生成されるごとにインクリメントされる。生成した実験室オブジェクトの数と一致する。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>プロパティ</h2>
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            frameID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            仮想３次元空間を描画するcanvas要素を出力する要素のid名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            playButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            時間発展を開始するスタートボタンを表す要素のid名。本プロパティを指定しない場合、実行と同時に時間発展が開始される（pauseFlagにfalseが与えられる）。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            resetButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            仮想物理実験室の状態を初期状態へ遷移させるためのボタンを表す要素のid 名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            pictureID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            画面キャプチャボタンを表す要素のid名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            仮想物理実験室の時刻を表示する要素のid 名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            useJQuery
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            jQueryの利用の有無を指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            g
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            9.8
+        </td>
+        <td>
+            重力加速度。重力加速度の向きはz軸のマイナス方向。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            dt
+        </th>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            0.001
+        </td>
+        <td>
+            時間発展時の１ステップあたりの時間間隔。小さいほど計算精度が高くなる。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            step
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            0
+        </td>
+        <td>
+            実験室内のステップ数。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            skipRendering
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            40
+        </td>
+        <td>
+            １回描画する間に間引回数。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            displayFPS
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            FPS計測結果の表示の有無を指定するブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            draggable
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            本実験室に登場する３次元オブジェクトをマウスドラックで移動するための初期化を行うブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            allowDrag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            本実験室に登場する３次元オブジェクトをマウスドラックにて移動することの可否を表すブール値。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            locusFlag
+        </th>
+        <td>
+            &lt;bool&gt;|"pause"
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            3 次元オブジェクトの軌跡の表示の有無をブール値あるいは文字列で指定。"pause" と指定すると、実験室の状態が停止状態の時のみ軌跡が表示される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            velocityVectorFlag
+        </th>
+        <td>
+            &lt;bool&gt;|"pause"
+        </td>
+        <td>"pause"</td>
+        <td>
+            3次元オブジェクトの速度ベクトルの表示の有無をブール値あるいは文字列で指定。"pause" と指定すると、実験室の状態が停止状態の時のみ速度ベクトルが表示される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            boundingBoxFlag
+        </td>
+        <td>&lt;bool&gt;|"dragg"
+        </td>
+        <td>
+            "dragg"
+        </td>
+        <td>
+            3 次元オブジェクトのバウンディングボックスの表示の有無をブール値あるいは文字列で指定。"dragg" と指定すると、マウスドラック時のみ軌が表示される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            strobeFlag
+        </th>
+        <td>
+            &lt;bool&gt;|"pause"
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            3 次元オブジェクトのストロボ表示の有無をブール値あるいは文字列で指定。"pause" と指定すると、実験室の状態が停止状態の時のみストロボが表示される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            locusButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            3 次元オブジェクトの軌跡の表示の有無を切り替えるラジオボタン要素のid 名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            velocityVectorButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            3 次元オブジェクトの速度ベクトルの表示の有無を切り替えるラジオボタン要素のid 名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            strobeButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            3 次元オブジェクトのストロボ表示の有無を切り替えるラジオボタン要素のid 名。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            loadFilePath
+        </th>
+        <td>
+            &lt;strign&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            読み込みを行う保存データのファイルパス。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            saveDataDownloadButtonID
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            保存した実験室データをダウンロードを開始するボタンのid名。HTML文書のbody要素に本プロパティに与えたid名のa要素を配置する必要がある。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            pauseStepList
+        </th>
+        <td>
+            [&lt;int&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            時間発展を一時停止させる時間の配列。この配列に格納した時間ステップで、仮想物理実験の時間発展を一時停止にする。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            renderer
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            clearColor : 0xFFFFFF,<br/>
+            clearAlpha : 1.0, <br/>
+            parameters : { <br/>
+            antialias: false, <br/>
+            stencil: true, <br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスのレンダラーのパラメータを指定するオブジェクト。プロパティの意味は次のとおり。<br/>
+            clearColor : クリアーカラー（背景色）<br/>
+            clearAlpha : クリアーアルファ（背景透明度）<br/>
+            parameters : WebGLRendererクラスのコンストラクタに渡すパラメータ<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            camera
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            type : "Perspective", <br/>
+            position: { x:15, y:0, z:15 },<br/>
+            up : { x:0, y:0, z:1 }, <br/>
+            target: { x:0, y:0, z:0 }, <br/>
+            fov : 45, <br/>
+            near : 0.1, <br/>
+            far : 100, <br/>
+            left : -10, <br/>
+            right: 10, <br/>
+            top: 10, <br/>
+            bottom: -10,<br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスのカメラの種類とパラメータを指定するオブジェクト。カメラとして透視投影（デフォルト）、正投影が用意されている。プロパティの意味は次のとおり。<br/>
+            type: カメラの種類（ Perspective | Orthographic）<br/>
+            position: カメラの位置座標<br/>
+            up: カメラの上ベクトル<br/>
+            target: カメラの向き中心座標<br/>
+            fov: 視野角<br/>
+            near: 視体積手前までの距離<br/>
+            far: 視体積の奥までの距離<br/>
+            left: 視体積の左までの距離（正投影）<br/>
+            right: 視体積の右までの距離（正投影）<br/>
+            top: 視体積の上までの距離（正投影）<br/>
+            bottom: 視体積の下までの距離（正投影）
+        </td>
+    </tr>
+    <tr>
+        <th>
+            light
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            { <br/>
+            type : "Directional", <br/>
+            position: { x:0, y:0, z:10 },<br/>
+            target :{ x:0, y:0, z:0}, <br/>
+            color: 0xFFFFFF, <br/>
+            intensity: 1, <br/>
+            distance: 0, <br/>
+            angle: Math.PI/4, <br/>
+            exponent: 20, <br/>
+            ambient: null <br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスの光源の種類とパラメータを指定するオブジェクト。光源として平行光源（デフォルト）、スポットライト光源、点光源が用意されている。プロパティの意味は次のとおり。<br/>
+            type: 光源の種類（ Directional | Spot | Point）<br/>
+            position: 光源位置<br/>
+            target: 光源の向き（平行光源, スポットライト光源）<br/>
+            color: 光源色<br/>
+            intensity: 光源強度<br/>
+            distance: 距離減衰指数（スポットライト光源, 点光源）<br/>
+            angle: 角度（スポットライト光源）<br/>
+            exponent: 光軸からの減衰指数（スポットライト）<br/>
+            ambient: 環境光源色
+        </td>
+    </tr>
+    <tr>
+        <th>
+            shadow
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            shadowMapEnabled: false,<br/>
+            shadowMapWidth: 512,<br/>
+            shadowMapHeight: 512,<br/>
+            shadowCameraVisible: false,<br/>
+            shadowCameraNear: 0.1,<br/>
+            shadowCameraFar: 50,<br/>
+            shadowCameraFov: 120,<br/>
+            shadowCameraRight: 10, <br/>
+            shadowCameraLeft: -10,<br/>
+            shadowCameraTop: 10,<br/>
+            shadowCameraBottom: -10,<br/>
+            shadowDarkness: 0.5<br/>
+            }
+        </td>
+        <td>
+            ３次元グラフィックスの影描画関連のパラメータを指定するオブジェクト。プロパティの意味は次のとおり。<br/>
+            shadowMapEnabled: シャドーマップの利用<br/>
+            shadowMapWidth:シャドーマップの横幅<br/>
+            shadowMapHeight:シャドーマップの高さ<br/>
+            shadowCameraVisible:シャドーマップの可視化<br/>
+            shadowCameraNear:シャドーカメラのnear<br/>
+            shadowCameraFar: シャドーカメラのfar<br/>
+            shadowCameraFov: シャドーカメラのfov<br/>
+            shadowCameraRight: シャドーカメラのright<br/>
+            shadowCameraLeft: シャドーカメラのleft<br/>
+            shadowCameraTop: シャドーカメラのtop<br/>
+            shadowCameraBottom: シャドーカメラのbottom<br/>
+            shadowDarkness: 影の黒さ
+        </td>
+    </tr>
+    <tr>
+        <th>
+            trackball
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            noRotate : false, <br/>
+            rotateSpeed : 2.0,<br/>
+            noZoom : false, <br/>
+            zoomSpeed : 1.0, <br/>
+            noPan : false, <br/>
+            panSpeed : 1.0, <br/>
+            staticMoving : true,<br/>
+            dynamicDampingFactor : 0.3,<br/>
+            }
+        </td>
+        <td>
+            カメラパラメータをマウス操作で変更するための仕組みであるトラックボール関連パラメータ。プロパティの意味は次のとおり。<br>
+            enabled :トラックボール利用の有無<br/>
+            noRotate : トラックボールの回転無効化<br/>
+            rotateSpeed : トラックボールの回転速度の設定<br/>
+            noZoom : トラックボールの拡大無効化<br/>
+            zoomSpeed : トラックボールの拡大速度の設定<br/>
+            noPan : トラックボールのカメラ中心移動の無効化と中心速度の設定<br/>
+            panSpeed : 中心速度の設定<br/>
+            staticMoving : トラックボールのスタティックムーブの有効化<br/>
+            dynamicDampingFactor : トラックボールのダイナミックムーブ時の減衰定数<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeslider
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled: false,<br/>
+            skipRecord: 50,<br/>
+            domID: null,<br/>
+            save: {<br/>
+            flag: false,<br/>
+            objects: []<br/>
+            }<br/>
+            }
+        </td>
+        <td>
+            時間制御スライダーを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled：時間制御スライダー利用の有無<br/>
+            skipRecord：運動記録の間引回数<br/>
+            domID：時間制御スライダーの要素のID 名<br/>
+            save：制御前の最新データを保持するためのオブジェクト（内部）<br/>
+            save.flag：最新データの保持フラグ（内部）<br/>
+            save.objects：3 次元オブジェクトの最新情報が格納された配列（内部）<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            playback
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            checkID : null, <br/>
+            locusVisible : true,<br/>
+            velocityVectorVisible : false,<br/>
+            strobeVisible : false<br/>
+            }
+        </td>
+        <td>
+            再生モードを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : 再生モード利用の有無<br/>
+            checkID : checkボックスのID<br/>
+            locusVisible : 軌跡の表示<br/>
+            velocityVectorVisible : 速度ベクトルの表示<br/>
+            strobeVisible : ストロボの表示
+        </td>
+    </tr>
+    <tr>
+        <th>
+            video
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            downloadButtonID : null,<br/>
+            makeButtonID : null,<br/>
+            speed : 30,<br/>
+            quality :0.8,<br/>
+            fileName : "video.webm",<br/>
+            makeStartFlag : false,<br/>
+            makingFlag : false,<br/>
+            finishedFlag : false,<br/>
+            readyFlag : false<br/>
+            }
+        </td>
+        <td>
+            動画生成を実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : 動画生成利用の有無<br/>
+            downloadButtonID : 動画ダウンロードボタンID<br/>
+            makeButtonID : 動画生成ボタンID<br/>
+            speed : 動画のフレームレート<br/>
+            quality : 動画の画質<br/>
+            fileName : 動画のファイル名<br/>
+            makeStartFlag : 動画生成開始フラグ（内部）<br/>
+            makingFlag : 動画生成中フラグ（内部）<br/>
+            finishedFlag : 動画生成完了フラグ（内部）<br/>
+            readyFlag : 動画生成完了フラグ（内部）<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            skybox
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            cubeMapTexture : null,<br/>
+            size: 400,<br/>
+            r:{ x:0, y:0, z:0 }<br/>
+            }
+        </td>
+        <td>
+            スカイボックスを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : スカイボックス利用の有無<br/>
+            cubeMapTexture : テクスチャ<br/>
+            size : スカイボックスのサイズ<br/>
+            r: スカイボックスの位置<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            skydome
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            radius : 200,<br/>
+            topColor : 0x2E52FF,<br/>
+            bottomColor : 0xFFFFFF,<br/>
+            exp : 0.8,<br/>
+            offset : 5<br/>
+            }
+        </td>
+        <td>
+            スカイドームを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : スカイドーム利用の有無<br/>
+            radius : スカイドームの半径<br/>
+            topColor : ドーム天頂色<br/>
+            bottomColor : ドーム底面色<br/>
+            exp : 混合指数<br/>
+            offset : 高さ基準点
+        </td>
+    </tr>
+    <tr>
+        <th>
+            fog
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            type: "linear",<br/>
+            color: null,<br/>
+            near: 0.1,<br/>
+            far: 30,<br/>
+            density : 1/20<br/>
+            }
+        </td>
+        <td>
+            フォグを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : フォグ利用の有無<br/>
+            type : フォグの種類（ "linear" | "exp" ）<br/>
+            color : フォグ色<br/>
+            near : フォグ開始距離（線形フォグ）<br/>
+            far : フォグ終了距離（線形フォグ）<br/>
+            density : フォグの濃度（指数フォグ）
+        </td>
+    </tr>
+    <tr>
+        <th>
+            lensFlare
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+
+        <td>
+            {<br/>
+            enabled: false,<br/>
+            flareColor: 0xFFFFFF,<br/>
+            flareSize: 300,<br/>
+            flareTexture: null,<br/>
+            ghostTexture: null,<br/>
+            ghostList : [<br/>
+            { size: 60, distance:0.6 },<br/>
+            { size: 70, distance:0.7 },<br/>
+            { size: 120, distance:0.9 },<br/>
+            { size: 70, distance:1.0 },<br/>
+            ]<br/>
+            }
+        </td>
+        <td>
+            レンズフレアを実装するために必要なプロパティなどを格納するオブジェクト。<br/>
+            enabled : レンズフレア利用の有無<br/>
+            flareColor : フレアテクスチャの発光色<br/>
+            flareSize : フレアのサイズ<br/>
+            flareTexture : フレアテクスチャ<br/>
+            ghostTexture : ゴーストテクスチャ<br/>
+            ghostList : レンズフレアのリスト（サイズと距離をオブジェクトリテラルで指定）
+        </td>
+    </tr>
+    <tr>
+        <th>
+            objects
+        </th>
+        <td>
+            &lt;array&gt;
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            本実験室にて物理演算の対象とするオブジェクト。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h2>内部プロパティ</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            プロパティ名
+        </th>
+        <th>
+            データ型
+        </th>
+        <th>
+            デフォルト
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            id
+        </th>
+        <td>
+            &lt;int&gt;
+        </td>
+        <td>
+            —
+        </td>
+        <td>
+            生成された仮想物理実験室オブジェクトの識別番号。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initFlag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            仮想物理実験室が初期状態であることを示すフラグ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            pauseFlag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            仮想物理実験室が一時停止状態であることを示すフラグ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            resetFlag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            仮想物理実験室を初期状態へ戻すフラグ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makePictureFlag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            画面キャプチャの生成フラグ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makeSaveDataFlag
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            true
+        </td>
+        <td>
+            セーブデータ生成フラグ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            stats
+        </th>
+        <td>
+            &lt;Stats&gt;
+        </td>
+        <td>
+            new Stats()
+        </td>
+        <td>
+            FPS計測・表示用のオブジェクト。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            draggableObjects
+        </th>
+        <td>
+            &lt;array&gt;
+        </td>
+        <td>
+            [&lt;Mesh&gt;]
+        </td>
+        <td>
+            draggableフラグが立てられているマウスドラックにて移動を行うことのできる３次元オブジェクトの、概形を表すバウンディングボックスオブジェクト（three.jsのMeshクラスのオブジェクト）が格納される配列。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            CG
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {}
+        </td>
+        <td>
+            仮想物理実験室のコンピュータ・グラフィックス関連の各種プロパティが格納されるプロパティ。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            collisionDetectionObjects
+        </th>
+        <td>
+            [&lt;PhysObject&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            衝突判定を行う３次元オブジェクトが格納される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            copyPropertyList
+        </th>
+        <td>
+            [&lt;string&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            コピー対象プロパティリスト。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            loadData
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            null
+        </td>
+        <td>
+            保存データ読み込み後のオブジェクトを格納するプロパティ。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>メソッド</h2>
+<table>
+    <thead>
+    <tr>
+        <th>
+            メソッド名
+        </th>
+        <th>
+            引数
+        </th>
+        <th>
+            戻値
+        </th>
+        <th>
+            説明
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th>
+            setParameter ( parameter )
+        </th>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            コンストラクタの引数で指定されたパラメータを実際に各プロパティに与えるメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getProperty ( object )
+        </th>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            実験室オブジェクトや３次元オブジェクトの完全コピーを生成するために必要なプロパティを取得するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            clone ( object )
+        </th>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            引数で与えられた実験室オブジェクトあるいは３次元オブジェクトの完全コピーを生成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getSaveData ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            { physLab:&lt;PhysLabObject&gt;,objects:[ &lt;PhyObjectObject&gt;]}
+        </td>
+        <td>
+            実験室オブジェクト並びに３次元オブジェクトのコピーに必要な全プロパティを格納したオブジェクトを生成して返す。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makeJSONSaveData()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            makeSaveDataFlagフラグが立てられた時に、JSON形式の保存データをダウンロードできるように、BlobURLをa要素に与える。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            loadJSONSaveData( filePath)
+        </th>
+        <td>
+            &lt;string&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            loadFilePathプロパティに指定されたファイルパスに存在する実験室データが保存されたファイルを読み込んで、JSON形式からオブジェクトに変換後、結果をloadDataプロパティに与える。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            restorePhysObjectsFromLoadData ()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            loadDataプロパティに与えられた３次元オブジェクトのプロパティから改めて３次元オブジェクトを生成して、実験室オブジェクトに登録する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            startLab ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室を開始する。全ての準備が完了した後に実行する必要がある。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            createPhysObject( physObject )
+        </th>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で与えられた３次元オブジェクトを仮想物理実験室に生成するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initEvent ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            JavaScriptにおけるイベント登録をおこなう。r1では、FPS計測結果を表示するHTML要素を追加と、スタートボタンのクリック時イベントの宣言のみが実装。時間発展の制御を行うボタンの設定、初期値を設定するスライダー関連のイベントが定義されている。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            switchButton
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            実験室の状態に応じてボタンの表示内容を変更するためメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            init3DCG ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室による３次元グラフィックス関連の初期化を行う。具体的には、initThree、initCamera、initLightが実行される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initThree ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            three.jsの初期化を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initCamera ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            three.jsにおけるカメラオブジェクトの初期化を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initLight ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            three.jsにおける光源オブジェクトの初期化を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            initDragg ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室内に配置された３次元オブジェクトをマウスドラックで移動させるために必要な初期化を行う。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            mouseDownEvent(physObject) <br/>
+            mouseDraggEvent(physObject)<br/>
+            mouseUpEvent(physObject)
+        </th>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            —
+        </td>
+        <td>
+            3
+            次元オブジェクトがマウスダウンされた時、マウスドラックされた時、マウスアップされた時に実行するメソッド。引数にはマウスドラックされている３次元オブジェクトが格納される。実験室の実装時にオーバーライドで利用できるように空のメソッドが定義されている。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            loop ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室における無限ループ。時間発展が停止中でも本関数による無限ループは停止しない。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeControl ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室内の時間を制御するメソッド。loopメソッドの中で呼び出される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makeVideo ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室の状態に応じて動画各フレームの取得、動画のコンパイル、動画オブジェクトの初期化
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkFlags ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室の状態をチェックして時間発展を制御するためのメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            timeEvolution ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            仮想物理実験室の時間発展を実行するメッド。loopメソッド内で実行されることを想定している。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makePicture ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            canvas 要素に描画された仮想物理実験室の３次元グラフィックスをPNG 形式の画像データとして生成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            makeDownloadData ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            ３次元オブジェクトの任意の運動データを格納したダウンロードデータを作成するメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            beforeInitEvent() <br/>
+            afterInitEvent()<br/>
+            beforeInit3DCG()<br/>
+            afterInit3DCG()<br/>
+            afterStartLab()<br/>
+            beforeTimeControl()<br/>
+            afterTimeControl()<br/>
+            beforeCheckFlags()<br/>
+            afterCheckFlags()<br/>
+            breforeTimeEvolution()<br/>
+            centerTimeEvolution()<br/>
+            afterTimeEvolution()<br/>
+            breforeMakePicture()<br/>
+            afterMakePicture()<br/>
+            breforeMakeJSONSaveData()<br/>
+            afterMakeJSONSaveData()<br/>
+            beforeLoop()<br/>
+            afterLoop()
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            —
+        </td>
+        <td>
+            仮想物理実験室内の外部との情報のやりとりを行うメソッド（通信メソッドと呼ぶ）。主要なメソッドの最初と最後に配置され、目的に応じてオーバーライドすることで実験室の柔軟な制御に利用することができる。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkCollision( contact )
+        </th>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            collisionDetectionObjects プロパティに格納された衝突判定対象となる全ての3 次元オブジェクト同士の衝突判定を行うメソッド。接触判定を行う場合、引数をtrueとする。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkContact ( )
+        </th>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            collisionDetectionObjects プロパティに格納された衝突判定対象となる全ての3 次元オブジェクト同士の接触判定を行うメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkPossibilityOfCollision(<br/>
+            object1,object2)
+        </th>
+        <td>
+            &lt; PhysObject &gt;<br/>
+            &lt; PhysObject &gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            引数で指定した２つの３次元オブジェクトのバウンディング球同士の衝突を判定する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkCollisionSphereVsPlane ( sphere , object , noSide)
+        </th>
+        <td>
+            &lt; Sphere&gt;<br/>
+            &lt; Plane &gt;<br/>
+            &lt;bool&gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            第１引数で指定した球オブジェクトと第２引数で指定した３次元オブジェクトを構成する平面との衝突を判定する。衝突が検知された場合には、球オブジェクトのcollisionObjectsプロパティに衝突力計算に必要な情報が格納される。平面の端での衝突判定を行わない場合には第３引数にtrueを与える。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionPlane ( sphere, object, i )
+        </th>
+        <td>
+            &lt;Sphere&gt;<br/>
+            &lt;Plane&gt;<br/>
+            &lt;int&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            球オブジェクトと平面領域を持つ3 次元オブジェクトとの衝突判定を行うメソッド。衝突が検知された場合には、球オブジェクトへの力の加わる方向を返す。第1 引数に球オブジェクト（sphere）、第2
+            引数に衝突判定用３次元オブジェクト（object）、第3 引数に３次元オブジェクトの衝突判定を行う面の番号を指定する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionSide ( sphere, object, i )
+        </th>
+        <td>
+            &lt;Sphere&gt;<br/>
+            &lt;Plane&gt;<br/>
+            &lt;int&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            球オブジェクトと平面領域の辺との衝突判定を行うメソッド。衝突が検知された場合には、球オブジェクトへの力の加わる方向を返す。第1 引数に球オブジェクト（sphere）、第2
+            引数に衝突判定用３次元オブジェクト（object）、第3 引数に3 次元オブジェクトの衝突判定を行う面の番号を指定する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionEdge ( sphere, object, i )
+        </th>
+        <td>
+            &lt;Sphere&gt;<br/>
+            &lt;Plane&gt;<br/>
+            &lt;int&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            球オブジェクトと平面領域の角との衝突判定を行うメソッド。衝突が検知された場合には、球オブジェクトへの力の加わる方向を返す。第1 引数に球オブジェクト（sphere）、第2
+            引数に衝突判定用３次元オブジェクト（object）、第3 引数に3 次元オブジェクトの衝突判定を行う面の番号を指定する。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkCollisionSphereVsLine( sphere , object
+        </th>
+        <td>
+            &lt; Sphere&gt;<br/>
+            &lt;Line&gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            第１引数で指定した球オブジェクトと第２引数で指定した線オブジェクトの衝突判定・衝突計算を行うメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionSphere( positon1, radius1, positon2, radius2 )
+        </th>
+        <td>
+            &lt;Vector3&gt;<br/>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            引数に与えた２つの球体の位置（positon1, positon2）と半径（radius1, radius2）から衝突判定を行い、衝突を検知した場合には衝突力の方向ベクトルを返すメソッド。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkCollisionSphereVsSphere ( sphere1 , sphere2 )
+        </th>
+        <td>
+            &lt; Sphere&gt;<br/>
+            &lt;float&gt;<br/>
+            &lt; Sphere&gt;<br/>
+            &lt;float&gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            第１引数と第２引数で指定した球オブジェクト同士の衝突を判定する。衝突が検知された場合には、球オブジェクトのcollisionObjectsプロパティに衝突力計算に必要な情報が格納される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionSphere ( <br/>
+            positon1, radius1, positon2, radius2 )<br/>
+
+        </th>
+        <td>
+            &lt;Vector3&gt;<br/>
+            &lt;float&gt;<br/>
+            &lt;Vector3&gt;<br/>
+            &lt;float&gt;<br/>
+
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            第１引数と第２引数で指定した球オブジェクトの位置と半径、第３引数と第４引数で指定した球オブジェクトの位置と半径から衝突を判定する。衝突が検知された場合には、球オブジェクトのcollisionObjectsプロパティに衝突力計算に必要な情報が格納される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionCircle ( sphere, circle, i , noSide )
+        </th>
+        <td>
+            &lt;Sphere&gt;<br/>
+            &lt;Circle&gt;<br/>
+            &lt;int&gt;<br/>
+            &lt;bool&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            第１引数と第２引数で与えた球オブジェクト（sphere）と円オブジェクト（circle）との衝突判定を行い、衝突を検知した場合には衝突力の方向ベクトルを返すメソッド。第３引数は円オブジェクトを構成する円の衝突判定を行う番号、円端での衝突判定を行わない場合には第３引数にtrueを与える。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            checkCollisionSphereVsCylinder ( sphere , object )
+        </th>
+        <td>
+            &lt; Sphere&gt;<br/>
+            &lt;Cylinder&gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            第１引数と第２引数で指定した球オブジェクト同士の衝突を判定する。衝突が検知された場合には、球オブジェクトのcollisionObjectsプロパティに衝突力計算に必要な情報が格納される。<br/>
+
+        </td>
+    </tr>
+    <tr>
+        <th>
+            getCollisionCylinderSide( sphere, object )
+        </th>
+        <td>
+            &lt; Sphere&gt;<br/>
+            &lt;Cylinder&gt;
+        </td>
+        <td>
+            &lt;Vector3&gt;
+        </td>
+        <td>
+            第１引数と第２引数で指定した球オブジェクトの位置と半径、第３引数と第４引数で指定した球オブジェクトの位置と半径から衝突を判定する。衝突が検知された場合には、球オブジェクトのcollisionObjectsプロパティに衝突力計算に必要な情報が格納される。
+        </td>
+    </tr>
+    <tr>
+        <th>
+            removeCollisionDetectionObjects( physObject )
+        </th>
+        <td>
+            &lt;PhysObject&gt;
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            衝突計算の対象となるcollisionDetectionObjectsプロパティ（配列）から引数でしてした３次元オブジェクトを削除するメソッド。
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.js：Lineクラス（線オブジェクト）</title>
+    <style>
+        @import "../stylesheet/index.css";
+        /* jQueryUI用CSS */
+        @import "../stylesheet/jquery-ui-1.10.3.css";
+
+        /* jQueryUI用CSS */
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+
+        #toolbar {
+            width: 290px;
+            text-align: left;
+            margin: 10px 0px 0px 0px;
+            padding: 5px 5px;
+        }
+
+        #play {
+            width: 95px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/jquery-1.10.2.js"></script>
+    <!-- jQuery用ライブラリ -->
+    <script src="../javascript/jquery-ui-1.10.3.js"></script>
+    <!-- jQueryUI用ライブラリ -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- Three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/Stats.js"></script>
+    <!-- FPS表示ライブラリ -->
+
+    <!-- 本ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",        //額縁を表す要素のid名
+                pictureID: "picture",           //画面キャプチャボタンを表す要素のid名
+
+                useJQuery: true,                //jQueryの利用の可否を
+
+                //マウスドラック関連
+                draggable: true,                 //マウスドラック利用の有無
+                allowDrag: true,                //マウスドラックの可否
+
+                //数値計算パラメータ
+                g: 9.8,                          //重力加速度
+                dt: 0.001,                       //1ステップあたりの時間間隔
+                skipRendering: 40,               //描画間引回数
+
+                //レンダラー関連パラメータ
+                renderer: {
+                    clearColor: 0xE1FCFF,       //クリアーカラー（背景色）
+                },
+                //トラックボール関連パラメータ
+                trackball: {
+                    enabled: true,              //トラックボール利用の有無
+                },
+                //カメラ関連パラメータ
+                camera: {
+                    type: "Perspective",        //カメラの種類 （ Perspective | Orthographic）
+                    position: {x: 20, y: 0, z: 4}, //カメラの位置
+                    target: {x: 0, y: 0, z: 4},     //カメラの視野中心座標
+                },
+                //光源関連パラメータ
+                light: {
+                    type: "Directional",         //光源の種類 （ Directional | Spot | Point）
+                    position: {x: 5, y: 5, z: 15},  //光源位置
+                    target: {x: 0, y: 0, z: 0},     //光源の向き
+                    color: 0xFFFFFF,             //光源色
+                    ambient: 0x999999,           //環境光源の光源色
+                },
+                //影関連パラメータ
+                shadow: {
+                    shadowMapEnabled: true,   //シャドーマップの利用
+                    shadowCameraVisible: false,  //シャドーマップの可視化
+                },
+            });
+            //実験室はボタンが無い場合には実行と同時に時間発展を行うので、強制的に一時停止を行う
+            PHYSICS.physLab.afterInitEventFunctions.push(
+                    function () {
+                        this.pauseFlag = true; //一時停止フラグを設定
+                        this.switchButton();   //画像ダウンロードボタンを表示
+                    }.bind(PHYSICS.physLab)
+            );
+
+
+            ////////////////////////////////////////////////////////////////////
+            // 線オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Line({
+                        draggable: true,           //マウスドラックの有無
+                        allowDrag: true,          //マウスドラックの可否
+                        r: {x: 0, y: 0, z: 6},     //位置ベクトル
+                        collision: true,           //衝突判定の有無
+                        axis: {x: 0, y: 0, z: 1},     //姿勢軸ベクトル
+                        vertices: [               //頂点座標
+                            {x: 0, y: 0, z: 10},
+                            {x: 0, y: 4, z: 0},
+                            {x: 0, y: -5, z: 6},
+                            {x: 0, y: 5, z: 6},
+                            {x: 0, y: -4, z: 0},
+                            {x: 0, y: 0, z: 10}
+                        ],
+                        resetVertices: true,     //３次元グラフィックス中心座標の再計算
+                        spline: {
+                            enabled: false,       //スプライン補間の有無
+                            pointNum: 100         //スプライン補間時の補間点数
+                        },
+                        //材質オブジェクト関連パラメータ
+                        material: {
+                            type: "LineBasic",   //発光材質 ("LineBasic" || "LineDashedMaterial")
+                            color: 0xFF0000,     //発光色
+                        },
+                        //バウンディングボックス関連パラメータ
+                        boundingBox: {
+                            visible: true,       //バウンディングボックスの表示
+                            color: null,         //描画色
+                            opacity: 0.2,        //不透明度
+                            transparent: true,   //透過処理
+                        }
+                    })
+            );
+
+            ////////////////////////////////////////////////////////////////////
+            // 床オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects.push(
+                    new PHYSICS.Floor({
+                        draggable: false,       //マウスドラックの有無
+                        allowDrag: false,      //マウスドラックの可否
+                        collision: false,        //衝突判定の有無
+                        r: {x: 0, y: 0, z: 0},
+                    })
+            );
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+
+    </script>
+</head>
+<body>
+<h1>Lineクラス（線オブジェクト）</h1>
+
+<p>
+    <a href="http://www.natural-science.or.jp/laboratory/physicsjs.php" target="_blank">物理シミュレーション環境構築用HTML5フレームワーク「physics.js」</a>にて、線オブジェクトを生成するためのクラスです。指定した頂点座標をつなぐ単純な直線だけでなく、スプライン補間を利用した曲線も実装することができます。さらに、媒介変数表示の関数を利用して、任意の関数で生成する曲線を生成することもできます。また、生成した線オブジェクトと球オブジェクトとの衝突の実装も行います。
+</p>
+
+<h2>線オブジェクトの生成</h2>
+
+<pre class="brush: js;">
+var line = new PHYSICS.Line({
+	draggable: true,           //マウスドラックの有無
+	allowDrag : true,          //マウスドラックの可否
+	r: {x: 0, y: 0, z: 6},     //位置ベクトル
+	collision: true,           //衝突判定の有無
+	axis: {x:0, y:0, z:1},     //姿勢軸ベクトル
+	vertices : [               //頂点座標
+		{x:0,  y: 0,   z:10 },
+		{x:0,  y: 4,   z:0 },
+		{x:0,  y: -5,  z:6 },
+		{x:0,  y: 5,   z:6 },
+		{x:0,  y: -4,  z:0 },
+		{x:0,  y: 0,   z:10 }
+	],
+	resetVertices : true,     //３次元グラフィックス中心座標の再計算
+	spline : {
+		enabled : false,       //スプライン補間の有無
+		pointNum : 100         //スプライン補間時の補間点数
+	},
+	//材質オブジェクト関連パラメータ
+	material : {
+		type : "LineBasic",   //発光材質 ("LineBasic" || "LineDashedMaterial")
+		color : 0xFF0000,     //発光色
+	},
+	//バウンディングボックス関連パラメータ
+	boundingBox : {
+		visible : true,       //バウンディングボックスの表示
+		color : null,         //描画色
+		opacity : 0.2,        //不透明度
+		transparent : true,   //透過処理
+	}
+})
+</pre>
+
+<h2>線オブジェクトの３次元グラフィックス（画像ダウンロード：<a href="" id="picture"></a>）</h2>
+
+<div id="canvas-frame"></div>
+
+
+<h2>プロパティ</h2>
+<table>
+    <tr>
+        <th>プロパティ</th>
+        <th>データ型</th>
+        <th>デフォルト</th>
+        <th>説明</th>
+    </tr>
+
+    <tr>
+        <td>
+            vertices
+        </td>
+        <td>
+            [&lt;object&gt;]
+        </td>
+        <td>
+            [<br/>
+            { x : 0, y : 0, z : 0 },<br/>
+            { x : 0, y : -3, z : 5 },<br/>
+            { x : 0, y : 3, z : 5 },<br/>
+            { x : 0, y : 0, z : 0 }<br/>
+            ]
+        </td>
+        <td>
+            線オブジェクトの頂点座標を配列リテラルで格納するプロパティ。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            colors
+        </td>
+        <td>
+            [&lt;object&gt;]
+        </td>
+        <td>
+            []
+        </td>
+        <td>
+            線オブジェクトの頂点色を配列リテラルで格納するプロパティ。配列に格納するオブジェクトには以下に示すRGB形式、HSL形式、HEX形式を指定する。１つの線オブエクと内で複数の形式の混在も可能。<br/>
+            RGB形式：{ type:"RGB", r:◯, g: ◯, b: ◯ }<br/>
+            HSL形式：{ type:"HSL", h: ◯, s: ◯, l: ◯ }<br/>
+            HEX形式：{ type:"HEX", hex: ◯ }
+        </td>
+    </tr>
+    <tr>
+        <td>
+            spline
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            nabled : false, <br/>
+            pointNum : 100 <br/>
+            }
+        </td>
+        <td>
+            verticesプロパティで指定した頂点座標を３次関数の曲線でつなぐスプライン補間に関するプロパティ。<br/>
+            enabled：スプライン補間の有無<br/>
+            pointNum ：スプライン補間時の補間点数
+        </td>
+    </tr>
+    <tr>
+        <td>
+            resetVertices
+        </td>
+        <td>
+            &lt;bool&gt;
+        </td>
+        <td>
+            false
+        </td>
+        <td>
+            線オブジェクトの位置ベクトルの基準点（ローカル座標系の原点）と線オブジェクトの形状中心と一致させるかの有無を指定するブール値。trueとすると、内部プロパティ_verticesの値を平行移動する。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            parametricFunction
+        </td>
+        <td>
+            &lt;object&gt;
+        </td>
+        <td>
+            {<br/>
+            enabled : false,<br/>
+            pointNum : 100,<br/>
+            theta : { min : 0, max :1 },<br/>
+            position:function( _this, theta ){ return {x:0, y:0, z:0}},<br/>
+            color : function(_this, theta ){ return { type:"RGB", r:0, g:0, b:0 }}<br/>
+            }
+        </td>
+        <td>
+            頂点座標や頂点色を媒介変数関数で設定するために必要な関数やパラメータが格納されたプロパティ。媒介変数関数利用時はスプライン補間は無効。<br/>
+            enabled ：媒介変数関数の利用の有無。<br/>
+            pointNum：媒介変数の刻み数<br/>
+            theta：媒介変数の最小値（min）と最大値（max）<br/>
+            position：位置座標を指定する関数<br/>
+            color：頂点色を指定する関数<br/>
+            関数positionとcolorの引数_thisは引数の_thisはparametricFunctionオブジェクトを指すように実装。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            material.type
+        </td>
+        <td>
+            &lt; string&gt;
+        </td>
+        <td>
+            LineBasic
+        </td>
+        <td>
+            線オブジェクトを生成する材質オブジェクトを指定する文字列。実線"LineBasic"か破線 "LineDashedMaterial"のどちらかを指定。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            material.dashSize
+        </td>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            0.2
+        </td>
+        <td>
+            破線の実線部分の長さ。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            material.gapSize
+        </td>
+        <td>
+            &lt;float&gt;
+        </td>
+        <td>
+            0.2
+        </td>
+        <td>
+            破線の空白部分の長さ。
+        </td>
+    </tr>
+</table>
+
+<h2>メソッド</h2>
+<table>
+    <tr>
+        <th>メソッド名</th>
+        <th>引数</th>
+        <th>戻値</th>
+        <th>説明</th>
+    </tr>
+    <tr>
+        <td>
+            computeVerticesFromSpline ( _vertices, _colors )
+        </td>
+        <td>
+            [&lt;object&gt;],<br/>
+            [&lt;object&gt;]
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            引数で指定した頂点座標配列_verticesと頂点色配列_colorsからスプライン補間を利用して曲線を計算するメソッド。実行後、頂点座標と頂点色は親クラスの_verticesプロパティ、colorsプロパティに格納される。
+        </td>
+    </tr>
+    <tr>
+        <td>
+            computeVerticesFromParametricFunction ()
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            なし
+        </td>
+        <td>
+            コンストラクタの引数で指定した媒介変数関数を用いて頂点座標と頂点色を計算するメソッド。実行後、頂点座標と頂点色は親クラスの_verticesプロパティ、colorsプロパティに格納される。
+        </td>
+    </tr>
+</table>
+
+
+<!--
+<form mt:asset-id="8599" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150116-10.png" src="http://www.natural-science.or.jp/images/20150116-10.png" width="500" height="500" class="mt-image-none" style="" /></form>
+
+-->
+
+</body>
+</html>
+
+

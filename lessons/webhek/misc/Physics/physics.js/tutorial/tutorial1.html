@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>physics.jsの使い方１：実験室オブジェクトの宣言</title>
+    <style>
+        @import "../stylesheet/index.css";
+
+        #canvas-frame {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <!-- 外部JavaScriptファイルの読み込み -->
+    <script src="../javascript/three_r68.js"></script>
+    <!-- three.js用ライブラリ -->
+    <script src="../javascript/TrackballControls_r68.js"></script>
+    <!-- トラックボールコントロール用ライブラリ -->
+    <script src="../javascript/physics.js"></script>
+    <!-- 本ライブラリ -->
+    <script>
+        ////////////////////////////////////////////////////////////////////
+        // windowイベントの定義
+        ////////////////////////////////////////////////////////////////////
+        window.addEventListener("load", function () {
+
+            //仮想物理実験室オブジェクトの生成
+            PHYSICS.physLab = new PHYSICS.PhysLab({
+
+                //必須パラメータ
+                frameID: "canvas-frame",   //額縁を表す要素のid名
+
+            });
+
+            ////////////////////////////////////////////////////////////////////
+            // 軸オブジェクトの準備
+            ////////////////////////////////////////////////////////////////////
+            PHYSICS.physLab.objects[0] = new PHYSICS.Axis();
+
+            //仮想物理実験室のスタートメソッドの実行
+            PHYSICS.physLab.startLab();
+        });
+    </script>
+</head>
+<body>
+<h1>physics.jsの使い方１：「physics.js」のはじめかた</h1>
+
+<p>
+    文責：遠藤理平<br>
+    公開日：2015年01月21日<br>
+    最終更新日：2015年01月21日<br>
+</p>
+
+<h2>準備</h2>
+
+<p>
+
+    「<a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/physics.js.zip">physics.js.zip</a>」からzipファイルをダウンロードして解凍します。
+    仮想物理実験室の構築に最低限必要なJavascriptファイルは以下の３つです。
+</p>
+<ul>
+    <li>■ physics.js</li>
+    <li>■ three_r◯.js</li>
+    <li>■ TrackballControls_r◯.js</li>
+</ul>
+<p>
+    「physics.js」はフレームワークの本体となるJavascriptのライブラリファイル、「three_r◯.js」は仮想物理実験室の３次元グラフィックスを担当するthree.jsの本体となるライブラリファイル、「TrackballControls_r◯.js」は仮想３次元空間中のカメラをマウス操作で移動することのできるライブラリで、three.jsと一緒に公開されています。
+    「◯」はリビジョンを表す整数が入ります。この２つのJavaScriptファイルをHTML文書のhead要素内で次のとおり読み込みます。
+</p>
+
+<h3>プログラムソース：HTML文書のhead要素</h3>
+
+<pre class="brush: js;">
+&lt;script src=&quot;../javascript/three_r68.js&quot;&gt;&lt;/script&gt; &lt;!-- three.js用ライブラリ --&gt;
+&lt;script src=&quot;../javascript/TrackballControls_r68.js&quot;&gt;&lt;/script&gt; &lt;!-- トラックボールコントロール用ライブラリ --&gt;
+&lt;script src=&quot;../javascript/physics.js&quot;&gt;&lt;/script&gt;   &lt;!-- 本ライブラリ --&gt;
+</pre>
+
+<p>
+    なお、「physics.js」は「three.js」と「TrackballControls_r68.js」に依存するため、最後に読み込む必要があります。
+</p>
+<br>
+
+
+<h2>仮想物理実験オブジェクトの生成</h2>
+
+<p>
+    仮想物理実験室オブジェクトは、ウェブブラウザ内に仮想物理実験室を構築し、物理シミュレーション（数値計算＋３次元グラフィックス＋２次元グラフ）を実行するための根幹となるオブジェクトです。
+    <a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/physLab.html" target="_blank">PhysLabクラス</a>のコンストラクタで生成することができます。
+    コンストラクタの引数にオブジェクトリテラルとして様々なプロパティを指定することで、仮想物理実験としての各種機能を利用することができます。
+</p>
+
+
+<h3>プログラムソース：仮想物理実験室オブジェクトの生成</h3>
+<pre class="brush: js;">
+//仮想物理実験室オブジェクトの生成
+PHYSICS.physLab = new PHYSICS.PhysLab({
+	//必須パラメータ
+	frameID : &quot;canvas-frame&quot; //額縁を表す要素のid名
+});
+</pre>
+<p>
+    仮想物理実験室オブジェクトの生成に不可欠なプロパティは、three.jsが自動生成するWebGLを描画用canvas要素を配置するHTML要素のid名を指定する「frameID」のみです。
+    本項では、空のdiv要素に「id="&quot;canvas-frame&quot;"」の属性を与えています。
+</p>
+
+<br>
+
+
+<h2>軸オブジェクトの生成</h2>
+
+<p>
+    仮想物理実験室に登場する物体は「３次元オブジェクト」と総称します。本項では、３次元オブジェクトのそのひとつである「<a
+        href="http://www.natural-science.or.jp/article/20150115225137.php">軸オブジェクト</a>」の生成を行います。軸オブジェクトはAxisクラスのコンストラクタを用いて生成します。
+    ３次元オブジェクトは生成しただけでは仮想物理実験室内に登場せず、実験室オブジェクトの「objects」プロパティ（配列）に格納することで登場します。
+</p>
+
+<pre class="brush: js;">
+// 軸オブジェクトの準備
+PHYSICS.physLab.objects[ 0 ] = new PHYSICS.Axis( );
+</pre>
+
+<p>
+    上記のように配列の要素番号を指定して代入するほかに、配列のpushメソッドを用いて代入することもできます。
+</p>
+
+<pre class="brush: js;">
+PHYSICS.physLab.objects.push(
+	new PHYSICS.Axis( )
+)
+</pre>
+
+<br>
+
+
+<h2>軸オブジェクトの生成</h2>
+
+<p>
+    仮想物理実験室の準備が整った後に実行するのが、PhysLabクラスのstartLabメソッドです。
+    このメソッドが実行された後は、PhysLabクラスのloopメソッドによる無限プールの状態となります。
+</p>
+<pre class="brush: js;">
+//仮想物理実験室のスタートメソッドの実行
+PHYSICS.physLab.startLab();
+</pre>
+
+<br>
+
+<h2>HTML文書の全文</h2>
+
+<p>
+    ブラウザ内に仮想物理実験室を生成するには<br>
+    １．ライブラリ関連ファイルの読み込み<br>
+    ２．仮想物理実験室オブジェクトの生成<br>
+    ３．３次元オブジェクトの登録<br>
+    に加えて<br>
+    ４．３次元グラフィックスを描画するcanvas要素を配置するid属性を与えたdiv要素の用意する<br>
+    ５．div要素の縦横サイズをCSSにて指定する<br>
+    ことが必要となります。そして、最後に<br>
+    ６．PhysLabクラスのstartLabメソッドの実行することで仮想物理実験室のスタート<br>
+    します。<br>
+    <br>
+    初めての仮想物理実験室の生成なのでHTML文書全文を記述します。
+</p>
+
+<h3>プログラムソース　HTML文書</h3>
+<pre class="brush: js;">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;physics.jsの使い方１：実験室オブジェクトの宣言&lt;/title&gt;
+&lt;style&gt;
+#canvas-frame {
+	width : 500px;
+	height: 500px;
+}
+&lt;/style&gt;
+&lt;!-- 外部JavaScriptファイルの読み込み --&gt;
+&lt;script src=&quot;../javascript/three_r68.js&quot;&gt;&lt;/script&gt;             &lt;!-- three.js用ライブラリ --&gt;
+&lt;script src=&quot;../javascript/TrackballControls_r68.js&quot;&gt;&lt;/script&gt; &lt;!-- トラックボールコントロール用ライブラリ --&gt;
+&lt;script src=&quot;../javascript/physics.js&quot;&gt;&lt;/script&gt;               &lt;!-- 本ライブラリ --&gt;
+&lt;script&gt;
+////////////////////////////////////////////////////////////////////
+// windowイベントの定義
+////////////////////////////////////////////////////////////////////
+window.addEventListener(&quot;load&quot;, function () {
+
+	//仮想物理実験室オブジェクトの生成
+	PHYSICS.physLab = new PHYSICS.PhysLab({
+		//必須パラメータ
+		frameID : &quot;canvas-frame&quot;, //額縁を表す要素のid名
+	});
+
+	// 軸オブジェクトの準備
+	PHYSICS.physLab.objects[ 0 ] = new PHYSICS.Axis( );
+
+	//仮想物理実験室のスタートメソッドの実行
+	PHYSICS.physLab.startLab();
+});
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;canvas-frame&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+<br>
+
+
+<h2>実行結果</h2>
+
+<div id="canvas-frame"></div>
+
+<p>
+    マウス操作はデフォルトでは利用不可となっています。
+</p>
+
+<br>
+
+<h2>関連ページ</h2>
+
+
+<p>
+    ■<a href="../index.html#hajimekata">「physics.jsの使い方」目次</a><br>
+    ■<a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a>
+</p>
+
+
+</body>
+</html>
+
+<!--
+<form mt:asset-id="8600" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150121-1.png" src="http://www.natural-science.or.jp/images/20150121-1.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->

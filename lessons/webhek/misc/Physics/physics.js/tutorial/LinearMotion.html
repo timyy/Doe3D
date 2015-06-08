@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>「physics.js」による仮想物理実験室の構築：等速直線運動</title>
+    <style>
+        @import "../stylesheet/index.css";
+    </style>
+    <script type="text/javascript"
+            src="http://www.natural-science.or.jp/javascript/mathjax/MathJax.js?config=TeX-AMS_HTML-full"></script>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {inlineMath: [["$","$"],["\\(","\\)"]]}
+  });
+
+    </script>
+
+</head>
+<body>
+<h1>「physics.js」による仮想物理実験室の構築：等速直線運動</h1>
+
+<p>
+    文責：遠藤理平<br>
+    公開日：2015年02月03日<br>
+    最終更新日：2015年02月03日<br>
+</p>
+
+
+<p>
+    「<a href="http://www.natural-science.or.jp/laboratory/physicsjs.php">physics.js</a>」は、ウェブブラウザ内に仮想物理実験室を構築し、物理シミュレーション（数値計算＋３次元グラフィックス＋２次元グラフ）を実行するためのHTML5フレームワークです。
+    様々な物理系に対するphysics.jsを用いて作成した仮想物理実験室のサンプルを紹介していきます。今回のテーマは最も基本的な運動である等速直線運動です。
+</p>
+
+<h2>サンプル：等速直線運動</h2>
+
+<p>
+    サンプル：<a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/example/OneBodyLab_LinearMotion.html"
+            target="_blank">physics.jsによる仮想物理実験室：等速直線運動</a>
+</p>
+
+<p>
+    速度0, 2, 4, 6, 8, 10[m/s]の等速直線運動を行う球体の運動のシミュレーション。 0.5[s]毎にストロボを設定。
+</p>
+
+<h2>「physics.js」で生成した動画（等速直線運動）</h2>
+
+<p style="text-align:center">
+    <iframe width="600" height="450" src="https://www.youtube.com/embed/H6wIVgIic90" frameborder="0"
+            allowfullscreen></iframe>
+</p>
+
+<h2>時刻vs位置のグラフ</h2>
+
+<p style="text-align:center">
+    <a href="http://www.natural-science.or.jp/physics.js/physics.js_r1/example/OneBodyLab_LinearMotion.html"
+       target="_blank"><img src="http://www.natural-science.or.jp/physics.js/physics.js_r1/images/20150203-2.png"
+                            style="width:600px"></a>
+</p>
+
+<p>
+    時刻 $t$[s] の位置を $x(t)$[m]、速度をv[m/s]と表した場合、時刻と位置の関係は $ x(t) = v t $ となります。
+    上記グラフの横軸が時刻（$t$）、縦軸が位置$x(t)$なので、傾きが速度 $v$[m/s]となります。
+</p>
+
+
+<h2>関連ページ</h2>
+
+<p>
+    ■<a href="http://www.natural-science.or.jp/laboratory/physicsjs.php#hajimekata">「physics.jsの使い方」目次</a><br>
+    ■<a href="http://www.natural-science.or.jp/article/laboratory/physicsjs/">「physics.js」関連ページのアーカイブ</a>
+</p>
+
+
+</body>
+</html>
+
+
+<!--
+<form mt:asset-id="8603" class="mt-enclosure mt-enclosure-image" style="display: inline;"><img alt="20150125-1.png" src="http://www.natural-science.or.jp/images/20150125-1.png" width="500" height="500" class="mt-image-none" style="" /></form>
+-->
